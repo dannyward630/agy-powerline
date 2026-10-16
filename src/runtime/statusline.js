@@ -28,6 +28,18 @@ const STDIN_TIMEOUT_MS = 1000;
 const { config, error: configError } = readConfigFile();
 setLogDir(__dirname, isLogEnabled(configError ? null : config));
 
+// Antigravity can close the pipe before the statusline finishes writing. That
+// is a normal shutdown, so don't treat EPIPE as a runtime crash.
+process.stdout.on("error", (err) => {
+  if (err?.code === "EPIPE") {
+    process.exit(0);
+  }
+
+  logError("RUNTIME_CRASH", err);
+  process.stderr.write(`[agy-powerline] ${redact(err?.message || err)}\n`);
+  process.exit(0);
+});
+
 // A crash must not leave a stack trace in Antigravity's status bar.
 process.on("uncaughtException", (err) => {
   logError("RUNTIME_CRASH", err);

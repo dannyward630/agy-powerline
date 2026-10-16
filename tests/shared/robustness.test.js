@@ -5,6 +5,7 @@ const os = require("os");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
 const { record, ROOT, NODE, PAYLOAD, stageInstall } = require("../helpers");
+const { LOG_NAME } = require("../../src/lib/log");
 const { getGitInfo } = require("../../src/lib/git");
 const {
   renderStatusline,
@@ -160,10 +161,101 @@ async function testConcurrentExecCache() {
   );
 }
 
+async function testStdoutEpipe() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-stdout-epipe-"));
+  const home = path.join(root, "home");
+  const installDir = path.join(home, ".agy-powerline");
+  fs.mkdirSync(home, { recursive: true });
+  const env = { ...process.env, HOME: home, USERPROFILE: home };
+  delete env.AGY_POWERLINE_HOME;
+  delete env.AGY_POWERLINE_LOG;
+  stageInstall(installDir);
+
+  try {
+    const result = await new Promise((resolve) => {
+      const child = spawn(NODE, [path.join(installDir, "statusline.js")], {
+        windowsHide: true,
+        env,
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      let stderr = "";
+      let settled = false;
+      const timer = setTimeout(() => child.kill(), 8000);
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(value);
+      };
+
+      child.stderr.on("data", (chunk) => {
+        stderr += chunk;
+      });
+      child.once("error", (err) => finish({ code: null, signal: null, stderr: err.message }));
+      child.once("close", (code, signal) => finish({ code, signal, stderr }));
+      child.once("spawn", () => {
+        child.stdout.destroy();
+        child.stdin.end(PAYLOAD);
+      });
+    });
+    const logFile = path.join(installDir, LOG_NAME);
+    const log = fs.existsSync(logFile) ? fs.readFileSync(logFile, "utf8") : "";
+    record(
+      "runtime exits quietly when agy closes stdout early",
+      result.code === 0 && result.signal === null && result.stderr === "" && log === "",
+      `exit ${result.code}${result.signal ? ` (${result.signal})` : ""}, stderr ${JSON.stringify(result.stderr)}, log ${JSON.stringify(log)}`
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+async function testStdoutErrorIsLogged() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-stdout-error-"));
+  const home = path.join(root, "home");
+  const installDir = path.join(home, ".agy-powerline");
+  fs.mkdirSync(home, { recursive: true });
+  const env = { ...process.env, HOME: home, USERPROFILE: home };
+  delete env.AGY_POWERLINE_HOME;
+  delete env.AGY_POWERLINE_LOG;
+  stageInstall(installDir);
+
+  try {
+    const script = `require(${JSON.stringify(path.join(installDir, "statusline.js"))});
+      process.stdout.emit("error", Object.assign(new Error("synthetic stdout failure"), { code: "EIO" }));`;
+    const result = await new Promise((resolve) => {
+      const child = spawn(NODE, ["-e", script], {
+        windowsHide: true,
+        env,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      let stderr = "";
+      child.stderr.on("data", (chunk) => {
+        stderr += chunk;
+      });
+      child.once("error", (err) => resolve({ code: null, stderr: err.message }));
+      child.once("close", (code) => resolve({ code, stderr }));
+    });
+    const logFile = path.join(installDir, LOG_NAME);
+    const log = fs.existsSync(logFile) ? fs.readFileSync(logFile, "utf8") : "";
+    record(
+      "runtime logs non-EPIPE stdout errors",
+      result.code === 0 &&
+        result.stderr.includes("synthetic stdout failure") &&
+        log.includes("synthetic stdout failure"),
+      `exit ${result.code}, stderr ${JSON.stringify(result.stderr)}, log ${JSON.stringify(log)}`
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
 async function run() {
   testGitLookup();
   testWrongPayloadTypes();
   await testConcurrentExecCache();
+  await testStdoutEpipe();
+  await testStdoutErrorIsLogged();
 
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-bad-json-"));
   stageInstall(sandbox);
