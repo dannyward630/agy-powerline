@@ -20,6 +20,7 @@ registerSuite("configurator screens", "./shared/tui.test");
 registerSuite("git", "./shared/git.test");
 registerSuite("usage", "./shared/usage.test");
 registerSuite("problem log", "./shared/log.test");
+registerSuite("payload dump", "./shared/payload-dump.test");
 registerSuite("cli", "./shared/cli.test");
 registerSuite("readme", "./shared/readme.test");
 registerSuite("gallery", "./shared/gallery.test");
