@@ -4,6 +4,7 @@
 const { registerSuite } = require("./register");
 
 registerSuite("command shape", "./shared/command-shape.test");
+registerSuite("paths", "./shared/paths.test");
 registerSuite("renderer", "./shared/renderer.test");
 registerSuite("exec cache", "./shared/exec-cache.test");
 registerSuite("exec options", "./shared/exec-options.test");
