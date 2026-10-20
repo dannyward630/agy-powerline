@@ -35,6 +35,7 @@ Suite names are the `registerSuite()` calls in `tests/shared.js` (e.g. `renderer
    - The README's languages are the ones with a `README.<lang>.md` file, plus those with an open translation issue. Don't add another language without an issue for it.
    - Every `README.<lang>.md` is a translation of the README: a row you add, change or remove in its presets, themes, widget or command tables gets the same change in each of them (ids and commands stay in English; an English description is fine), while their prose may lag behind. The `readme` suite fails when a README misses a widget, theme or preset id or a command.
    - A new translation adds itself to the language switcher on the first lines of **every** README and its file name to `files` in `.all-contributorsrc`. The `readme` suite fails when a README doesn't link every other one.
+   - A new command, widget, theme or preset also goes in the root `llms.txt`; the `readme` suite checks its IDs and command names.
    - The bar's own text (labels, captions) stays in English, since translating it isn't decided yet.
    - A new README translation comes from a native or fluent speaker: drafting it with AI is fine, but they review every line themselves and say so in the PR.
    - `SECURITY.md` if you added a process, a file write or a network call.

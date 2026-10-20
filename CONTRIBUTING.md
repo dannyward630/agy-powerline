@@ -221,7 +221,7 @@ Run `npm test` to ensure it passes, then `npm run test:update` if the bar's outp
 
 ### 5. Document it
 
-Add the widget to the widget table in `README.md` (and the same row in every translation, `README.<lang>.md`; a description in English is fine if you don't speak the language) and to the Widgets list in `docs/configuration.md`, and add a `CHANGELOG.md` entry. The `readme` test suite fails if a README misses the widget.
+Add the widget to the widget table in `README.md` (and the same row in every translation, `README.<lang>.md`; a description in English is fine if you don't speak the language) and to the Widgets list in `docs/configuration.md`, and add a `CHANGELOG.md` entry. Add every new command, widget, theme or preset to the root `llms.txt` too. The `readme` test suite fails if a README misses the widget.
 
 ---
 

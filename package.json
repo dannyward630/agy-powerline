@@ -17,6 +17,7 @@
   "files": [
     "src",
     "README.md",
+    "llms.txt",
     "CHANGELOG.md",
     "LICENSE"
   ],

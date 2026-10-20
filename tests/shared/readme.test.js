@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const { record, runCli } = require("../helpers");
-const { VALID_WIDGET_IDS, PRESETS } = require("../../src/lib/config");
+const { VALID_WIDGET_IDS, PRESETS, LAYOUT_ORDER } = require("../../src/lib/config");
 const { THEME_ORDER } = require("../../src/lib/themes");
 
 // The README and every README.<lang>.md translation list the same widgets,
@@ -66,6 +66,32 @@ async function run() {
       `missing: ${missingLinks.join(", ")}`
     );
   }
+
+  const llms = fs.readFileSync(path.join(ROOT, "llms.txt"), "utf8");
+  const missingLlmsIds = ids.filter((id) => !llms.includes(`\`${id}\``));
+  const missingLayouts = LAYOUT_ORDER.filter((id) => !llms.includes(`\`${id}\``));
+  const missingCommands = commands.filter((name) => !llms.includes(`npx agy-powerline ${name}`));
+
+  record(
+    "llms.txt lists every widget, theme and preset id",
+    missingLlmsIds.length === 0,
+    `missing: ${missingLlmsIds.join(", ")}`
+  );
+  record(
+    "llms.txt lists every layout id",
+    missingLayouts.length === 0,
+    `missing: ${missingLayouts.join(", ")}`
+  );
+  record(
+    "llms.txt lists every command",
+    missingCommands.length === 0,
+    `missing: ${missingCommands.join(", ")}`
+  );
+  record(
+    "llms.txt contains no email addresses",
+    !/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(llms),
+    "no email addresses allowed"
+  );
 }
 
 module.exports = { run };

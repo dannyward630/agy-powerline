@@ -1,0 +1,119 @@
+# agy-powerline
+
+> A fast, configurable statusline for Google Antigravity CLI (`agy`). Requires Node.js 20+; has no runtime dependencies or network calls.
+
+## Install
+- `npx agy-powerline init` installs the statusline and wires it into Antigravity settings.
+- Restart `agy` once after `init`; `npx agy-powerline doctor` checks the installation.
+
+## Commands
+- `npx agy-powerline init [--yes]` — Install or update the statusline.
+- `npx agy-powerline configure` — Open the editor (alias `config`).
+- `npx agy-powerline preset <name>` — Apply a preset (`--list` to see them).
+- `npx agy-powerline theme <name>` — Switch theme (`--list`, `--gallery`).
+- `npx agy-powerline gradient <name>` — Color rows with a gradient (`--list`, `off`); presets: `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono`.
+- `npx agy-powerline layout <pills|lines|classic>` — Switch layout.
+- `npx agy-powerline caps <style>` — Switch the pill shape: `round`, `angled`, `slanted`, `flat`.
+- `npx agy-powerline export [file]` — Save your config to a file, to back it up or share it.
+- `npx agy-powerline import <file>` — Load a config after showing changes (`--merge`).
+- `npx agy-powerline doctor` — Check the install and explain what's wrong.
+- `npx agy-powerline report` — Write a privacy-safe bug report.
+- `npx agy-powerline uninstall [--delete]` — Remove it from agy (`--delete` also removes its files).
+- `npx agy-powerline render --demo` — Print the bar with sample data.
+
+## Presets
+- `default` — Model, context, git and quota meters.
+- `compact` — One-line model, quota, context and git.
+- `agent` — Agent state, mode, sandbox and artifacts.
+- `git` — Project, branch, worktree, stash and file changes.
+- `tokens` — Context, session tokens and cache usage.
+- `quotas` — Plan and quota meters.
+- `full` — Session, project, git, context, tokens and quotas.
+
+## Themes
+- `dark-aurora`
+- `dark-ocean`
+- `dark-ember`
+- `dark-forest`
+- `dark-neon`
+- `dark-mono`
+- `dark-nocturne`
+- `dark-onyx`
+- `dark-metro`
+- `dark-macchiato`
+- `light-paper`
+- `light-sky`
+- `light-sunset`
+- `light-cream`
+- `colorblind-dark`
+- `colorblind-light`
+- `custom` — Your own colors.
+
+## Layouts
+- `pills` — Powerline-style capsules.
+- `lines` — Plain colored text.
+- `classic` — Colored text with `|` dividers and block meters.
+
+## Widgets
+- `model` — The model in use.
+- `quota` — The quota closest to running out, with its reset.
+- `fiveHourBar` — 5-hour quota left as a pace-marked meter.
+- `fiveHourPct` — 5-hour quota left as a percentage.
+- `fiveHourReset` — Time until the 5-hour quota resets, or its reset time.
+- `weeklyBar` — 7-day quota left as a pace-marked meter.
+- `weeklyPct` — 7-day quota left as a percentage.
+- `weeklyReset` — Time until the 7-day quota resets, or its reset time.
+- `thirdPartyFiveHour` — Third-party 5-hour quota left.
+- `thirdPartyWeekly` — Third-party 7-day quota left.
+- `argonWeekly` — Gemini 4 Argon's weekly quota (Google AI Pro).
+- `argonReset` — Time until Argon's weekly quota resets.
+- `context` — Context window used as a meter.
+- `contextPct` — Context window used as a percentage.
+- `contextTokens` — Context tokens used out of the window size.
+- `cwd` — Current folder.
+- `project` — Project folder name.
+- `git` — Branch, uncommitted changes and ahead/behind counts.
+- `gitChanges` — Lines added and removed.
+- `gitFiles` — Staged, modified, untracked and conflicted file counts.
+- `gitSha` — Short ID of the checked-out commit.
+- `gitStash` — Number of stashes.
+- `gitWorktree` — Name of the linked worktree.
+- `plan` — Antigravity plan.
+- `agentState` — What the agent is doing.
+- `sandbox` — Sandbox and network restrictions.
+- `artifacts` — Number of artifacts.
+- `tasks` — Running subagents and background tasks.
+- `mode` — Approval mode and Vim mode.
+- `title` — Current conversation title.
+- `ram` — Memory used on the machine.
+- `version` — Antigravity CLI version.
+- `cacheRead` — Prompt-cache tokens read.
+- `cacheCreate` — Prompt-cache tokens created.
+- `cacheHit` — Prompt-cache usage.
+- `totalTokens` — Input and output tokens for the session.
+- `tokensToday` — Tokens used today across conversations.
+- `tokensWeek` — Tokens used over the last 7 days.
+- `exec` — Output from a shell command you configure.
+- `customText` — Your own text.
+
+## Config
+Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, use `$AGY_POWERLINE_HOME/statusline.config.json`. See [Configuration](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/configuration.md).
+```json
+{
+  "theme": "dark-aurora",
+  "layout": "pills",
+  "ascii": false,
+  "widgets": [
+    { "id": "model" },
+    { "id": "context" },
+    { "id": "git" }
+  ]
+}
+```
+
+## Rules for assistants
+- Do not edit `~/.gemini/antigravity-cli/settings.json` by hand; run `npx agy-powerline init`.
+- `configure` is an interactive TUI; do not run it on the user's behalf.
+- `import` asks before adding shell commands; never pass `--allow-exec` without approval of the exact commands.
+
+[README](https://github.com/wassim-azi/agy-powerline#readme) · [Install](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/install.md) · [Troubleshooting](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/troubleshooting.md) · [Security](https://github.com/wassim-azi/agy-powerline/blob/develop/SECURITY.md)
