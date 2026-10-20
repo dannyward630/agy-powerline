@@ -124,16 +124,16 @@ function testInvalidJsonDump() {
     );
 
     const withoutPosition = path.join(installDir, "invalid-without-position.json");
-    const rawWithoutPosition = "not json private-marker";
+    const rawWithoutPosition = "";
     writePayloadDump(withoutPosition, rawWithoutPosition);
 
-    const unpositionedText = fs.readFileSync(withoutPosition, "utf8");
-    const unpositioned = JSON.parse(unpositionedText);
+    const unpositioned = JSON.parse(fs.readFileSync(withoutPosition, "utf8"));
     record(
-      "invalid JSON without a parse position still writes only a privacy-safe flag",
+      "invalid JSON without a parse position writes only the invalid flag",
       unpositioned.invalid_json === true &&
-        Object.keys(unpositioned).every((key) => key === "invalid_json" || key === "position") &&
-        !unpositionedText.includes("private-marker")
+        !("position" in unpositioned) &&
+        Object.keys(unpositioned).join(",") === "invalid_json",
+      JSON.stringify(unpositioned)
     );
   });
 }
