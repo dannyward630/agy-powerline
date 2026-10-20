@@ -116,4 +116,9 @@ Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, u
 - `configure` is an interactive TUI; do not run it on the user's behalf.
 - `import` asks before adding shell commands; never pass `--allow-exec` without approval of the exact commands.
 
-[README](https://github.com/wassim-azi/agy-powerline#readme) · [Install](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/install.md) · [Troubleshooting](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/troubleshooting.md) · [Security](https://github.com/wassim-azi/agy-powerline/blob/develop/SECURITY.md)
+## Docs
+- [README](https://github.com/wassim-azi/agy-powerline#readme)
+- [Configuration](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/configuration.md)
+- [Install](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/install.md)
+- [Troubleshooting](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/troubleshooting.md)
+- [Security](https://github.com/wassim-azi/agy-powerline/blob/develop/SECURITY.md)
