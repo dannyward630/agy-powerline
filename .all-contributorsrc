@@ -23,7 +23,7 @@
       "name": "Danny Ward",
       "avatar_url": "https://avatars.githubusercontent.com/u/71604164?v=4",
       "profile": "https://github.com/dannyward630",
-      "contributions": ["code"]
+      "contributions": ["code", "test", "doc", "infra"]
     },
     {
       "login": "yoreva-01",
@@ -52,6 +52,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/188893946?v=4",
       "profile": "https://github.com/dharamdan01",
       "contributions": ["translation"]
+    },
+    {
+      "login": "Ashuge11",
+      "name": "Ashvini Sundge",
+      "avatar_url": "https://avatars.githubusercontent.com/u/210247942?v=4",
+      "profile": "https://github.com/Ashuge11",
+      "contributions": ["code"]
     }
   ]
 }
