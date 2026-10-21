@@ -45,6 +45,7 @@
 - `light-sky`
 - `light-sunset`
 - `light-cream`
+- `light-tokyo-night`
 - `colorblind-dark`
 - `colorblind-light`
 - `custom` — Your own colors.

@@ -252,6 +252,27 @@ const THEMES = {
     warn: "#d20f39",
   }),
 
+  // Palette from Tokyo Night Light (tokyo-night/tokyo-night-vscode-theme, MIT).
+  "light-tokyo-night": theme(
+    "light",
+    "Tokyo Night Light",
+    "Tokyo Night Light colors, tuned for contrast",
+    {
+      text: LIGHT_TEXT,
+      track: "#c8c8c8",
+      model: "#5a3e8e",
+      fiveHour: "#385f0d",
+      weekly: "#0f4b6e",
+      thirdParty: "#965027",
+      context: "#2959aa",
+      git: "#33635c",
+      gitDirty: "#8a3c25",
+      meta: "#6c6e75",
+      caution: "#8f5e15",
+      warn: "#7b2840",
+    }
+  ),
+
   "colorblind-dark": theme(
     "colorblind",
     "Color-blind Dark",
@@ -332,6 +353,7 @@ const THEME_ORDER = [
   "light-sky",
   "light-sunset",
   "light-cream",
+  "light-tokyo-night",
   "colorblind-dark",
   "colorblind-light",
   "custom",

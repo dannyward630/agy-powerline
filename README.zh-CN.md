@@ -82,7 +82,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | 终端背景   | 主题                                                                                                                                                     |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 深色       | `dark-aurora`（默认）、`dark-ocean`、`dark-ember`、`dark-forest`、`dark-neon`、`dark-mono`、`dark-nocturne`、`dark-onyx`、`dark-metro`、`dark-macchiato` |
-| 浅色       | `light-paper`、`light-sky`、`light-sunset`、`light-cream`                                                                                                |
+| 浅色       | `light-paper`、`light-sky`、`light-sunset`、`light-cream`、`light-tokyo-night`                                                                           |
 | 色盲友好   | `colorblind-dark`、`colorblind-light`                                                                                                                    |
 | 自定义颜色 | `custom`（[方法](docs/configuration.md#custom-theme)）                                                                                                   |
 
