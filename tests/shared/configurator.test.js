@@ -179,6 +179,27 @@ async function run() {
       failedWidget
     );
 
+    const osPreview = (navigator) => {
+      const browser = { console };
+      if (navigator) {
+        browser.navigator = navigator;
+      }
+      vm.runInContext(bundleCode, vm.createContext(browser));
+      const agy = browser.AgyConfigurator;
+      return agy
+        .renderStatusline(agy.sampleData(), { ...agy.defaultConfig(), widgets: [{ id: "os" }] })
+        .replace(/[[0-9;]*m/g, "");
+    };
+    record(
+      "the os widget previews the viewer's own system",
+      osPreview({ platform: "Win32" }).includes("Windows") &&
+        osPreview({ userAgentData: { platform: "macOS" }, platform: "MacIntel" }).includes(
+          "macOS"
+        ) &&
+        osPreview({ platform: "Linux x86_64" }).includes("Linux") &&
+        osPreview(null).includes("Linux")
+    );
+
     // Widget operations
     let widgets = [{ id: "model" }, { id: "git" }];
     widgets = page.addWidget(widgets, "sessionTime", 0);

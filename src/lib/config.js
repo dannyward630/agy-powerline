@@ -39,6 +39,7 @@ const VALID_WIDGET_IDS = new Set([
   "contextTokens",
   "cwd",
   "project",
+  "os",
   "git",
   "gitChanges",
   "gitFiles",

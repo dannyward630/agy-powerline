@@ -43,10 +43,12 @@ const {
   resolveColor,
   widgetColors,
   widgetTag,
+  OS_ICONS,
   isRaw,
   isPaced,
   METER_STYLES,
   meterStyle,
+  hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
@@ -267,7 +269,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     return { thresh, blinkSeq, color };
   }
 
-  if (hasNoData(id, session)) {
+  if (hasNoData(id, session) || hiddenByThreshold(id, widget, session)) {
     return null;
   }
 
@@ -411,6 +413,13 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         return null;
       }
       return fg(palette.location) + tag() + proj + RESET;
+    }
+
+    case "os": {
+      if (!session.os) {
+        return null;
+      }
+      return fg(palette.location) + tag(OS_ICONS[session.os]) + session.os + RESET;
     }
 
     case "git": {
