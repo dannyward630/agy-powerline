@@ -6,7 +6,7 @@ const path = require("path");
 const childProcess = require("child_process");
 const { record } = require("../helpers");
 const { renderStatusline, defaultConfig, sampleData } = require("../../src/lib/shared");
-const { getConfigDir, setConfigDir } = require("../../src/lib/config");
+const { LAYOUT_ORDER, getConfigDir, setConfigDir } = require("../../src/lib/config");
 const {
   SYNC_CACHE_NAME,
   STATUS_CACHE_NAME,
@@ -82,7 +82,7 @@ const DETAIL_WIDGETS = ["gitChanges", "gitFiles", "gitSha", "gitStash", "gitWork
 // repositories: values, hiding, the dirty marker, caching and hostile configs.
 function testGitDetails(root, git) {
   const write = (file, text) => fs.writeFileSync(file, text);
-  const widgets = (ids) => ids.map((id) => ({ id }));
+  const widgets = (ids) => ids.map((item) => (typeof item === "string" ? { id: item } : item));
   const render = (cwd, ids = DETAIL_WIDGETS, extra = {}) => {
     clearGitDetailsCache();
     return strip(
@@ -163,6 +163,24 @@ function testGitDetails(root, git) {
     "gitWorktree names the linked worktree and the stash count is shared with it",
     /Worktree: feature-tree/.test(render(tree)) && /Stash: 2/.test(render(tree))
   );
+  for (const layout of LAYOUT_ORDER) {
+    for (const ascii of [false, true]) {
+      const out = render(tree, [{ id: "gitWorktree", maxWidth: 8 }], { layout, ascii });
+      const expected = ascii ? "featu..." : "feature…";
+      record(
+        `${layout} gitWorktree maxWidth clips its value in ${ascii ? "ASCII" : "Unicode"} mode`,
+        out.includes(expected),
+        out
+      );
+    }
+    const baseline = render(tree, [{ id: "gitWorktree" }], { layout });
+    for (const maxWidth of [0, -1, "5", 1e9, null]) {
+      record(
+        `${layout} gitWorktree ignores invalid maxWidth ${String(maxWidth)}`,
+        render(tree, [{ id: "gitWorktree", maxWidth }], { layout }) === baseline
+      );
+    }
+  }
 
   git(clean, "checkout", "-q", "--detach");
   const detachedSha = git(clean, "rev-parse", "--short=7", "HEAD").trim();

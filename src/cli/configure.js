@@ -24,7 +24,7 @@ const {
 } = require("../lib/shared");
 const { resolveInstallDir } = require("../lib/paths");
 const { WIDGET_TAGS } = require("../lib/widget-style");
-const { editFields: getEditFields } = require("../lib/widget-options");
+const { editFields: getEditFields, stepNumberField } = require("../lib/widget-options");
 const { loadEditableConfig } = require("./config-guard");
 const {
   parseColor,
@@ -855,8 +855,7 @@ function setOption(key, value) {
 function stepOption(field, direction) {
   const current = editedWidget()[field.key];
   if (field.number !== undefined) {
-    const from = Number.isFinite(current) ? current : field.number;
-    setOption(field.key, Math.max(0, Math.min(100, from + direction * 5)));
+    setOption(field.key, stepNumberField(field, current, direction));
     return;
   }
   const index = field.values.findIndex((value) => value === current);

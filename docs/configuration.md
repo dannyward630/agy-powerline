@@ -101,6 +101,13 @@ Any widget accepts these options:
 - **`textColor`**: the text color (on the pill in Pills; the plain text parts in Lines).
 - **`bold`**: `false` drops bold in Pills (on by default); `true` makes a Lines widget bold.
 - **`raw`**: `true` shows only the value, without icon or label: `72.0% rem` instead of `⏳ 5h: 72.0% rem`.
+- **`depth`** (`cwd` only): an integer from 1 to 10 keeps the root and last N folders, replacing the middle with `…` (`...` in ASCII mode). `/` and `\` paths are supported; invalid values are ignored.
+- **`maxWidth`**: an integer from 4 to 200 clips only the value, with `…` (`...` in ASCII mode). It applies to `cwd`, `project`, `git` (branch only), `title`, `model`, `customText`, `exec` and `gitWorktree`; invalid values are ignored. On `title`, it replaces the built-in 30-column limit. The icon, label, dirty marker, git operation and ahead/behind counts are not included in the limit.
+
+| Option        | Configuration                     | Example                                                                |
+| ------------- | --------------------------------- | ---------------------------------------------------------------------- |
+| Folder depth  | `{ "id": "cwd", "depth": 2 }`     | `~/Documents/repos/app/src` → `~/…/app/src`                            |
+| Maximum width | `{ "id": "git", "maxWidth": 10 }` | `feature-with-a-long-name` → `feature-w…` (`feature...` in ASCII mode) |
 
 **Minimalist mode** turns `raw` on for every widget, which makes the bar much narrower on small terminals. Set `"minimalist": true` or press `m` in `configure`. A widget with `"raw": false` keeps its label even then.
 

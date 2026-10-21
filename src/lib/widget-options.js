@@ -1,6 +1,11 @@
 "use strict";
 
-const { resolveQuotaThresholds, resolveContextThresholds } = require("./formatters");
+const {
+  resolveQuotaThresholds,
+  resolveContextThresholds,
+  isValidDepth,
+  isValidMaxWidth,
+} = require("./formatters");
 const { METER_STYLE_IDS } = require("./widget-style");
 
 // Widgets that take each option, as the layouts read them.
@@ -24,6 +29,16 @@ const PACED_WIDGETS = new Set([
 const CONTEXT_WIDGETS = new Set(["context", "contextPct", "contextTokens"]);
 const METER_WIDGETS = new Set([...PACED_WIDGETS, "context"]);
 const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset", "argonReset"]);
+const MAX_WIDTH_WIDGETS = new Set([
+  "cwd",
+  "project",
+  "git",
+  "title",
+  "model",
+  "customText",
+  "exec",
+  "gitWorktree",
+]);
 const COLOR_SLOTS = ["model", "context", "git", "weekly", "thirdParty", "fiveHour", "meta"];
 
 const onOff = (value) => (value ? "on" : "off");
@@ -132,6 +147,31 @@ function editFields(widget, config = {}, options = {}) {
       }
     );
   }
+  if (widget.id === "cwd") {
+    fields.push({
+      key: "depth",
+      label: "Folder depth",
+      values: [undefined, 1, 2, 3, 4],
+      show: (value) =>
+        !isValidDepth(value) ? "full path" : `${value} folder${value === 1 ? "" : "s"}`,
+      help: "Keeps the root and last folders, replacing the middle with an ellipsis.",
+    });
+  }
+  if (MAX_WIDTH_WIDGETS.has(widget.id)) {
+    fields.push({
+      key: "maxWidth",
+      label: "Max width",
+      number: 10,
+      step: 5,
+      min: 10,
+      max: 80,
+      show: (value) => (isValidMaxWidth(value) ? `${value} columns` : "no limit"),
+      help:
+        widget.id === "title"
+          ? "Limits the title, replacing its default 30-column limit."
+          : "Limits the displayed value; the icon and label stay the same.",
+    });
+  }
   if (thresholds) {
     const what = quota ? "left" : "used";
     fields.push(
@@ -183,12 +223,22 @@ function editFields(widget, config = {}, options = {}) {
   return fields;
 }
 
+function stepNumberField(field, current, direction) {
+  const from = Number.isFinite(current) ? current : field.number;
+  const min = Number.isFinite(field.min) ? field.min : 0;
+  const max = Number.isFinite(field.max) ? field.max : 100;
+  const step = Number.isFinite(field.step) ? field.step : 5;
+  return Math.max(min, Math.min(max, from + direction * step));
+}
+
 module.exports = {
   QUOTA_WIDGETS,
   PACED_WIDGETS,
   CONTEXT_WIDGETS,
   METER_WIDGETS,
   RESET_WIDGETS,
+  MAX_WIDTH_WIDGETS,
   COLOR_SLOTS,
   editFields,
+  stepNumberField,
 };

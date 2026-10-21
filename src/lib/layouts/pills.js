@@ -34,7 +34,8 @@ const {
   gitFileParts,
   formatTasks,
   formatMode,
-  clipText,
+  limitWidth,
+  shortenPath,
   homePath,
   basenameOf,
   label,
@@ -189,7 +190,13 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       }
       return pill(
         colors.model,
-        lbl(widget?.short ? shortModelName(session.model, ascii) : session.model)
+        lbl(
+          limitWidth(
+            widget?.short ? shortModelName(session.model, ascii) : session.model,
+            widget,
+            ascii
+          )
+        )
       );
 
     case "quota": {
@@ -480,7 +487,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     }
 
     case "cwd": {
-      const name = homePath(session.cwd);
+      const name = limitWidth(
+        shortenPath(homePath(session.cwd), widget?.depth, ascii),
+        widget,
+        ascii
+      );
       if (!name) {
         return null;
       }
@@ -488,7 +499,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     }
 
     case "project": {
-      const name = basenameOf(session.project);
+      const name = limitWidth(basenameOf(session.project), widget, ascii);
       if (!name) {
         return null;
       }
@@ -505,9 +516,10 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       const opPart = opStr ? `|${opStr}` : "";
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
+      const branch = limitWidth(session.git.branch, widget, ascii);
       return pill(
         session.git.dirty ? colors.gitDirty : colors.git,
-        lbl(`${mark}${session.git.branch}${opPart}${syncPart}`)
+        lbl(`${mark}${branch}${opPart}${syncPart}`)
       );
     }
 
@@ -545,7 +557,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!session.gitDetails?.worktree) {
         return null;
       }
-      return pill(colors.git, lbl(session.gitDetails.worktree));
+      return pill(colors.git, lbl(limitWidth(session.gitDetails.worktree, widget, ascii)));
 
     case "plan":
       if (!session.plan) {
@@ -590,7 +602,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!session.title) {
         return null;
       }
-      return pill(colors.meta, lbl(clipText(session.title, TITLE_MAX, ascii)));
+      return pill(colors.meta, lbl(limitWidth(session.title, widget, ascii, TITLE_MAX)));
 
     case "ram": {
       const pct = session.ramPct ?? 0;
@@ -679,11 +691,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!widget?.text) {
         return null;
       }
-      return pill(colors.meta, lbl(widget.text));
+      return pill(colors.meta, lbl(limitWidth(widget.text, widget, ascii)));
     }
 
     case "exec": {
-      const output = execWidgetOutput(widget, session);
+      const output = limitWidth(execWidgetOutput(widget, session), widget, ascii);
       if (!output) {
         return null;
       }

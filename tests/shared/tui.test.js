@@ -128,6 +128,24 @@ function testWidgetEditor() {
   // A selected label sits between the pill's round ends, hence the `.?`.
   const model = edit(0);
   const bar = edit(1, { cursor: 2 });
+  const cwd = strip(
+    renderFrame({
+      config: { ...defaultConfig(), widgets: [{ id: "cwd" }] },
+      screen: "edit",
+      editIndex: 0,
+      cursor: 2,
+      columns: 160,
+    })
+  );
+  const maxWidth = strip(
+    renderFrame({
+      config: { ...defaultConfig(), widgets: [{ id: "model" }] },
+      screen: "edit",
+      editIndex: 0,
+      cursor: 3,
+      columns: 160,
+    })
+  );
   record(
     "Enter on a widget opens its options, with the values it has set",
     /Edit · 🤖 Model/.test(model) &&
@@ -144,6 +162,13 @@ function testWidgetEditor() {
   record(
     "the editor explains the selected option and draws the widget with it",
     /╭─ Caution at ─/.test(bar) && /share left/.test(bar) && /PREVIEW/.test(bar)
+  );
+  record(
+    "configure shows cwd depth and per-widget max width options and help",
+    /Folder depth.? +full path/.test(cwd) &&
+      /Keeps the root and last folders/.test(cwd) &&
+      /Max width.? +no limit/.test(maxWidth) &&
+      /Limits the displayed value/.test(maxWidth)
   );
   record(
     "typing into a text option shows the text and keeps q for typing",

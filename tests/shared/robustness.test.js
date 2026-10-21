@@ -84,6 +84,24 @@ function testWrongPayloadTypes() {
   });
   record("meter styles of the wrong type don't break the bar", meters);
 
+  const badWidgetOptions = LAYOUT_ORDER.every((layout) => {
+    try {
+      const bad = mergeConfig({
+        layout,
+        widgets: [
+          { id: "cwd", depth: { x: 1 }, maxWidth: [8] },
+          { id: "git", maxWidth: "5" },
+          { id: "title", maxWidth: 1e9 },
+        ],
+      });
+      const out = renderStatusline(base, bad, { color: "none" });
+      return !out.includes("[object Object]");
+    } catch {
+      return false;
+    }
+  });
+  record("wrong-typed depth and maxWidth options don't break the bar", badWidgetOptions);
+
   // The flex separator pads to terminal_width; a huge value must not allocate it.
   const widths = [1e12, "Infinity", -1, "wide"].map((width) => {
     try {
