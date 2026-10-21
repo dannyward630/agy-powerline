@@ -48,6 +48,7 @@ const {
   resolveColor,
   widgetColors,
   widgetTag,
+  OS_ICONS,
   isRaw,
   isPaced,
   METER_STYLES,
@@ -494,6 +495,13 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       return pill(colors.meta, lbl(name));
+    }
+
+    case "os": {
+      if (!session.os) {
+        return null;
+      }
+      return pill(colors.meta, lbl(session.os, OS_ICONS[session.os]));
     }
 
     case "git": {

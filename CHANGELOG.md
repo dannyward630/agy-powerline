@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Per-widget quota and context visibility thresholds in the bar and `configure` (#99)
+- Optional `os` widget shows Windows, macOS, Linux or WSL (#63)
 
 ## [1.4.0] - 2026-10-20
 

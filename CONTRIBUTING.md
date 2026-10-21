@@ -10,6 +10,10 @@ Using an AI coding agent (Antigravity CLI, Claude Code, Codex, Cursor, Copilot, 
 
 ## 🛠️ Quickstart & Development Setup
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/wassim-azi/agy-powerline?quickstart=1)
+
+Prefer not to install Node locally? Use the badge above, or clone the repository in VS Code and choose **Dev Containers: Reopen in Container**. The container installs dependencies when it is created; run the checks below once it is ready.
+
 1. **Clone the repository:**
 
    ```bash

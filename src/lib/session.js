@@ -4,6 +4,7 @@ const os = require("os");
 const { formatReset, resetInSeconds, firstText } = require("./formatters");
 const { resolveGit, resolveGitDetails } = require("./git");
 const { resolveUsage } = require("./usage");
+const { isWsl } = require("./paths");
 
 const FIVE_HOURS = 5 * 3600;
 const SEVEN_DAYS = 7 * 86400;
@@ -21,6 +22,19 @@ const QUOTA_BUCKETS = {
 };
 // No quota window lasts a year: a reset further out is a broken value.
 const MAX_RESET_SECONDS = 366 * 86400;
+
+function currentOsName() {
+  if (process.platform === "win32") {
+    return "Windows";
+  }
+  if (process.platform === "darwin") {
+    return "macOS";
+  }
+  if (process.platform === "linux") {
+    return isWsl() ? "WSL" : "Linux";
+  }
+  return process.platform;
+}
 
 // Payload numbers can be strings, negative or absurd. The bar must never show
 // NaN, a negative count or more than 100%.
@@ -193,8 +207,10 @@ function extractSession(data, config, options = {}) {
   const cacheHitPct = cacheTotal > 0 ? Math.round((cacheReadTokens * 100) / cacheTotal) : 0;
 
   const modelName = firstText(data.model?.display_name, data.model?.id);
+  const osName = config?.widgets?.some((widget) => widget?.id === "os") ? currentOsName() : "";
 
   return {
+    os: osName,
     ramPct,
     model: modelName,
     contextPct,
