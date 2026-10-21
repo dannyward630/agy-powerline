@@ -190,6 +190,16 @@ Quota and context widgets change color as they get low or full: the theme's ok c
 - **`contextCrit`** _(default: `90`%)_: used context at which they turn to the danger color. Antigravity's `exceeds_200k_tokens` also triggers it.
 - **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. `b` in `configure` turns it on or off.
 - **Per widget**: any quota or context widget takes its own `warn`, `crit` and `blink` (e.g. `{"id": "fiveHourBar", "warn": 20, "crit": 10, "blink": true}`).
+- **Visibility per widget**: quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) and their reset widgets (`fiveHourReset`, `weeklyReset`, `argonReset`) take `showBelow`, a remaining-quota percentage from 0 to 100. The widget hides while more remains and appears at or below the threshold. A reset widget uses its own quota window. Context widgets (`context`, `contextPct`, `contextTokens`) take `showAbove`, a used-context percentage from 0 to 100; they hide below the threshold and appear at or above it. Both options are unset by default (`always` in `configure`); values that aren't numbers from 0 to 100 are ignored.
+
+```json
+{
+  "widgets": [
+    { "id": "weeklyBar", "showBelow": 50 },
+    { "id": "contextPct", "showAbove": 60 }
+  ]
+}
+```
 
 ## Shell command widget (`exec`)
 

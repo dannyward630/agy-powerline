@@ -1,19 +1,15 @@
 "use strict";
 
 const { resolveQuotaThresholds, resolveContextThresholds } = require("./formatters");
-const { METER_STYLE_IDS } = require("./widget-style");
+const {
+  METER_STYLE_IDS,
+  QUOTA_WIDGETS,
+  CONTEXT_WIDGETS,
+  RESET_WIDGETS,
+  isVisibilityThreshold,
+} = require("./widget-style");
 
 // Widgets that take each option, as the layouts read them.
-const QUOTA_WIDGETS = new Set([
-  "quota",
-  "fiveHourBar",
-  "fiveHourPct",
-  "weeklyBar",
-  "weeklyPct",
-  "thirdPartyFiveHour",
-  "thirdPartyWeekly",
-  "argonWeekly",
-]);
 const PACED_WIDGETS = new Set([
   "fiveHourBar",
   "weeklyBar",
@@ -21,9 +17,7 @@ const PACED_WIDGETS = new Set([
   "thirdPartyWeekly",
   "argonWeekly",
 ]);
-const CONTEXT_WIDGETS = new Set(["context", "contextPct", "contextTokens"]);
 const METER_WIDGETS = new Set([...PACED_WIDGETS, "context"]);
-const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset", "argonReset"]);
 const COLOR_SLOTS = ["model", "context", "git", "weekly", "thirdParty", "fiveHour", "meta"];
 
 const onOff = (value) => (value ? "on" : "off");
@@ -160,6 +154,24 @@ function editFields(widget, config = {}, options = {}) {
         help: "Makes the widget blink when it reaches the danger (or caution) level. ASCII mode never blinks.",
       }
     );
+  }
+  if (QUOTA_WIDGETS.has(widget.id) || RESET_WIDGETS.has(widget.id)) {
+    fields.push({
+      key: "showBelow",
+      label: "Show below",
+      number: 50,
+      show: (value) => (isVisibilityThreshold(value) ? `${value}%` : "always"),
+      help: "Hides the widget until less than this share is left.",
+    });
+  }
+  if (context) {
+    fields.push({
+      key: "showAbove",
+      label: "Show above",
+      number: 50,
+      show: (value) => (isVisibilityThreshold(value) ? `${value}%` : "always"),
+      help: "Hides the widget until more than this share is used.",
+    });
   }
   if (METER_WIDGETS.has(widget.id)) {
     fields.push({

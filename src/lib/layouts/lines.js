@@ -46,6 +46,7 @@ const {
   isPaced,
   METER_STYLES,
   meterStyle,
+  hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
@@ -266,7 +267,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     return { thresh, blinkSeq, color };
   }
 
-  if (hasNoData(id, session)) {
+  if (hasNoData(id, session) || hiddenByThreshold(id, widget, session)) {
     return null;
   }
 

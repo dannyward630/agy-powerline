@@ -52,6 +52,7 @@ const {
   isPaced,
   METER_STYLES,
   meterStyle,
+  hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
@@ -178,7 +179,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
   const pace = (quota) => (isPaced(widget, config) ? quota.elapsedPct : null);
   const over200k = session.exceeds200k ? " >200k" : "";
 
-  if (hasNoData(id, session)) {
+  if (hasNoData(id, session) || hiddenByThreshold(id, widget, session)) {
     return null;
   }
 

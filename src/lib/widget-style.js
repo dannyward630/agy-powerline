@@ -180,8 +180,62 @@ const TITLE_MAX = 30;
 const RAM_CAUTION = 80;
 const RAM_DANGER = 90;
 
+// Widgets whose visibility follows quota or context use the normalized
+// session fields below. Reset widgets follow their own quota window.
+const QUOTA_WIDGETS = new Set([
+  "quota",
+  "fiveHourBar",
+  "fiveHourPct",
+  "weeklyBar",
+  "weeklyPct",
+  "thirdPartyFiveHour",
+  "thirdPartyWeekly",
+  "argonWeekly",
+]);
 const CONTEXT_WIDGETS = new Set(["context", "contextPct", "contextTokens"]);
+const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset", "argonReset"]);
+const SHOW_BELOW_SESSION_KEYS = {
+  quota: "tightestQuota",
+  fiveHourBar: "fiveHour",
+  fiveHourPct: "fiveHour",
+  fiveHourReset: "fiveHour",
+  weeklyBar: "weekly",
+  weeklyPct: "weekly",
+  weeklyReset: "weekly",
+  thirdPartyFiveHour: "thirdPartyFiveHour",
+  thirdPartyWeekly: "thirdPartyWeekly",
+  argonWeekly: "argonWeekly",
+  argonReset: "argonWeekly",
+};
 const USAGE_WIDGETS = new Set(["cacheRead", "cacheCreate", "cacheHit"]);
+
+function isVisibilityThreshold(value) {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+// Invalid hand-edited values behave like unset options, leaving the widget
+// visible as it was before per-widget visibility thresholds existed.
+function hiddenByThreshold(id, widget, session) {
+  const quotaKey = Object.hasOwn(SHOW_BELOW_SESSION_KEYS, id) ? SHOW_BELOW_SESSION_KEYS[id] : null;
+  if (quotaKey && isVisibilityThreshold(widget?.showBelow)) {
+    const remaining = session?.[quotaKey]?.remaining;
+    return (
+      typeof remaining === "number" && Number.isFinite(remaining) && remaining > widget.showBelow
+    );
+  }
+
+  if (CONTEXT_WIDGETS.has(id) && isVisibilityThreshold(widget?.showAbove)) {
+    const used = session?.contextPct;
+    return (
+      session?.hasContext === true &&
+      typeof used === "number" &&
+      Number.isFinite(used) &&
+      used < widget.showAbove
+    );
+  }
+
+  return false;
+}
 
 // Widgets with no data to show hide instead of drawing zeros: no context
 // window in the payload is not "0/0", no usage is not "0% cache hit".
@@ -204,6 +258,11 @@ module.exports = {
   METER_STYLE_IDS,
   isMeterStyle,
   meterStyle,
+  QUOTA_WIDGETS,
+  CONTEXT_WIDGETS,
+  RESET_WIDGETS,
+  isVisibilityThreshold,
+  hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
