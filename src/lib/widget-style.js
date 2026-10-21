@@ -18,6 +18,7 @@ const NAMED_COLORS = {
 // Slots that signal state rather than identity. A widget's own color never
 // replaces them, so caution/danger alerts still stand out.
 const STATE_SLOTS = new Set(["text", "terminal", "track", "caution", "warn", "gitDirty"]);
+const OS_ICONS = { Windows: "🪟", macOS: "🍎", Linux: "🐧", WSL: "🐧" };
 
 // A theme slot ("git"), a basic name ("cyan"), or hex/rgb ("#ff8800").
 function resolveColor(value, colors) {
@@ -100,6 +101,7 @@ const WIDGET_TAGS = {
   contextTokens: { icon: "💾", name: "Context" },
   cwd: { icon: "📂", name: "Dir" },
   project: { icon: "📦", name: "Project" },
+  os: { icon: "🖥️", name: "" },
   git: { icon: "🌿", name: "" },
   gitChanges: { icon: "📝", name: "Lines" },
   gitFiles: { icon: "📄", name: "Files" },
@@ -196,6 +198,7 @@ module.exports = {
   STATE_SLOTS,
   resolveColor,
   widgetColors,
+  OS_ICONS,
   WIDGET_TAGS,
   widgetTag,
   isRaw,

@@ -22,6 +22,37 @@ function render(data, widgets, options = {}) {
   );
 }
 
+function withPlatform(platform, wsl, fn) {
+  const platformDescriptor = Object.getOwnPropertyDescriptor(process, "platform");
+  const previousWsl = process.env.WSL_DISTRO_NAME;
+  const readFileSync = fs.readFileSync;
+
+  Object.defineProperty(process, "platform", { ...platformDescriptor, value: platform });
+  if (wsl) {
+    process.env.WSL_DISTRO_NAME = "Ubuntu";
+  } else {
+    delete process.env.WSL_DISTRO_NAME;
+  }
+  fs.readFileSync = function (file, ...args) {
+    if (file === "/proc/version") {
+      return "Linux version";
+    }
+    return readFileSync.call(fs, file, ...args);
+  };
+
+  try {
+    return fn();
+  } finally {
+    Object.defineProperty(process, "platform", platformDescriptor);
+    if (previousWsl === undefined) {
+      delete process.env.WSL_DISTRO_NAME;
+    } else {
+      process.env.WSL_DISTRO_NAME = previousWsl;
+    }
+    fs.readFileSync = readFileSync;
+  }
+}
+
 async function run() {
   testTightestQuota();
   testSplitTokens();
@@ -30,6 +61,37 @@ async function run() {
   testTasks();
   testMode();
   testTitle();
+  testOsWidget();
+}
+
+function testOsWidget() {
+  const data = fixture("antigravity-1.3.0.json");
+  const widgets = [{ id: "os" }];
+  const platforms = [
+    ["win32", false, "Windows", "🪟"],
+    ["darwin", false, "macOS", "🍎"],
+    ["linux", false, "Linux", "🐧"],
+    ["linux", true, "WSL", "🐧"],
+    ["freebsd", false, "freebsd", "🖥️"],
+  ];
+  const icons = ["🪟", "🍎", "🐧", "🖥️"];
+
+  for (const [platform, wsl, name, icon] of platforms) {
+    withPlatform(platform, wsl, () => {
+      for (const layout of LAYOUT_ORDER) {
+        const output = render(data, widgets, { layout });
+        record(`${layout} os widget shows ${name}`, output.includes(`${icon} ${name}`), output);
+
+        const asciiOutput = render(data, widgets, { layout, ascii: true });
+        record(
+          `${layout} os widget shows ${name} without emoji in ASCII mode`,
+          asciiOutput.includes(name) &&
+            icons.every((candidate) => !asciiOutput.includes(candidate)),
+          asciiOutput
+        );
+      }
+    });
+  }
 }
 
 function testTitle() {
