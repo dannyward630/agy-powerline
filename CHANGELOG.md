@@ -5,20 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.5.0] - 2026-10-21
 
 ### Added
 
-- Folder depth for `cwd` and per-widget maximum widths for selected values (#98)
-- Per-widget quota and context visibility thresholds in the bar and `configure` (#99)
-- `clock` widget shows the current local time, in the 12/24-hour format set under `clock` (#46)
-- Optional `os` widget shows Windows, macOS, Linux or WSL (#63)
-- Opt-in `host` widget shows the current user and short hostname (#62)
+- Folder depth for `cwd` and per-widget maximum widths for selected values (#98, thanks @dannyward630)
+- Per-widget quota and context visibility thresholds in the bar and `configure` (#99, thanks @dannyward630)
+- `clock` widget shows the current local time, in the 12/24-hour format set under `clock` (#46, thanks @Ashuge11)
+- Optional `os` widget shows Windows, macOS, Linux or WSL (#63, thanks @dannyward630)
+- Opt-in `host` widget shows the current user and short hostname; `doctor` shows them as `user@host`, since its output gets pasted into issues (#62, thanks @dannyward630)
 - Every widget takes its own `label` and `icon`, in the config file and in `configure` (Label text, Icon) (#97)
+- `llms.txt` in the package: install, commands, widgets, themes and presets in one file for AI assistants (#130, thanks @dannyward630)
 
 ### Fixed
 
-- `cwd` widget shows a path written for another OS (a Windows path on Linux or WSL, a POSIX path on Windows) as it is, instead of joining it to the current folder (#134)
+- `cwd` widget shows a path written for another OS (a Windows path on Linux or WSL, a POSIX path on Windows) as it is, instead of joining it to the current folder (#134, thanks @dannyward630)
 
 ## [1.4.0] - 2026-10-20
 
