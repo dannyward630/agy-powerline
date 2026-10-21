@@ -167,6 +167,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/) or with `npx
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Session tokens and prompt cache usage                                                                    |
 | `tokensToday`, `tokensWeek`                                   | Tokens used today and over the last 7 days, all conversations (Node 22.13+)                              |
 | `ram`                                                         | Memory used on your machine                                                                              |
+| `os`                                                          | System agy runs on: Windows, macOS, Linux or WSL                                                         |
 | `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                              |
 | `customText`, `exec`                                          | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec)       |
 

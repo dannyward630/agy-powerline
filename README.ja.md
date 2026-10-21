@@ -156,6 +156,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | セッションのトークン数とプロンプトキャッシュの使用状況                                                   |
 | `tokensToday`、`tokensWeek`                                   | 今日と過去 7 日間のトークン使用量（すべての会話、Node 22.13 以降）                                       |
 | `ram`                                                         | マシンのメモリ使用量                                                                                     |
+| `os`                                                          | System agy runs on: Windows, macOS, Linux or WSL                                                         |
 | `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                              |
 | `customText`、`exec`                                          | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力           |
 

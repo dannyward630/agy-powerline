@@ -42,9 +42,22 @@ function buildBrowserBundle() {
   return `(function () {
 "use strict";
 
+// The os widget names the viewer's own system, as it would in their terminal.
+function browserPlatform() {
+  const nav = typeof navigator === "undefined" ? null : navigator;
+  const name = String((nav && nav.userAgentData && nav.userAgentData.platform) || (nav && nav.platform) || "").toLowerCase();
+  if (name.startsWith("win")) {
+    return "win32";
+  }
+  if (name.startsWith("mac")) {
+    return "darwin";
+  }
+  return "linux";
+}
+
 const process = {
   env: {},
-  platform: "linux",
+  platform: browserPlatform(),
   execPath: "/usr/bin/node",
   version: "v22.0.0",
   stdout: { columns: 80, rows: 24 },
@@ -234,8 +247,9 @@ const __shimOs = {
   freemem: () => 8589934592,
   totalmem: () => 17179869184,
   userInfo: () => ({ username: "you" }),
+  hostname: () => "devbox",
   tmpdir: () => "/tmp",
-  platform: () => "linux",
+  platform: () => process.platform,
   release: () => "1.0.0",
   endianness: () => "LE",
 };

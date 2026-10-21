@@ -54,7 +54,7 @@ Enter on a widget opens its options: color, label (shown or value only), and wha
 
 ## Widgets
 
-Most values come from the JSON Antigravity pipes on stdin; `host` and `ram` read from the OS, and token totals across conversations read from agy's local database. A widget with nothing to show hides itself: a model, quota, reset time, context window or token usage that is missing from the payload (or unusable) is left out, not shown as `Unknown`, `0%` or `now`.
+Most values come from the JSON Antigravity pipes on stdin; `host`, `os` and `ram` read from the machine agy runs on, and token totals across conversations read from agy's local database. A widget with nothing to show hides itself: a model, quota, reset time, context window or token usage that is missing from the payload (or unusable) is left out, not shown as `Unknown`, `0%` or `now`.
 
 - Model (`model.display_name`; `"short": true` shows `3.8 Flash·High` instead of `Gemini 3.8 Flash (High)`)
 - Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; the Argon weekly bucket (`Argon 7d`) for Gemini 4 Argon, the other `gemini-*` buckets for the other Gemini models and for Argon on plans without an Argon bucket, `3p-*` for the others)
@@ -83,8 +83,9 @@ Most values come from the JSON Antigravity pipes on stdin; `host` and `ram` read
 - Running subagents and background tasks (`tasks` e.g. `👥 2 subagents, 1 task`: subagents whose `status` is `running`, and `task_count`; hidden when nothing runs)
 - Approval and Vim mode (`mode` e.g. `🧭 accept-edits, NORMAL`: `cycle_mode` and `vim.mode`; an approval mode shows in the caution color; hidden in the default mode with Vim editing off)
 - Conversation title (`title` e.g. `💬 Fix the config loader`: `conversation_title` on one line, cut to 30 columns; hidden until the conversation has a title; among the first widgets dropped when a row doesn't fit)
+- Operating system (`os` e.g. `🍎 macOS`: Windows, macOS, Linux or WSL, read from the machine agy runs on, not the payload)
 - Cache read / create
-- Current user and short host name (`host`, e.g. `🖥️ alex@devbox`): reads the user from OS account info (falling back to `USER` / `USERNAME`) and the hostname up to the first dot
+- Current user and short host name (`host` e.g. `👤 alex@devbox`: reads the user from OS account info (falling back to `USER` / `USERNAME`) and the hostname up to the first dot)
 - RAM usage of your machine (`ram`, read from the OS; caution color from 80%, danger from 90%)
 - Sandbox with network security state (`sandbox (net)` vs `sandbox (isolated)`)
 - Flex Separator (grows to fill `terminal_width`)
@@ -191,6 +192,16 @@ Quota and context widgets change color as they get low or full: the theme's ok c
 - **`contextCrit`** _(default: `90`%)_: used context at which they turn to the danger color. Antigravity's `exceeds_200k_tokens` also triggers it.
 - **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. `b` in `configure` turns it on or off.
 - **Per widget**: any quota or context widget takes its own `warn`, `crit` and `blink` (e.g. `{"id": "fiveHourBar", "warn": 20, "crit": 10, "blink": true}`).
+- **Visibility per widget**: quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) and their reset widgets (`fiveHourReset`, `weeklyReset`, `argonReset`) take `showBelow`, a remaining-quota percentage from 0 to 100. The widget hides while more remains and appears at or below the threshold. A reset widget uses its own quota window. Context widgets (`context`, `contextPct`, `contextTokens`) take `showAbove`, a used-context percentage from 0 to 100; they hide below the threshold and appear at or above it. Both options are unset by default (`always` in `configure`); values that aren't numbers from 0 to 100 are ignored.
+
+```json
+{
+  "widgets": [
+    { "id": "weeklyBar", "showBelow": 50 },
+    { "id": "contextPct", "showAbove": 60 }
+  ]
+}
+```
 
 ## Shell command widget (`exec`)
 

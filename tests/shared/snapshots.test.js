@@ -196,6 +196,9 @@ function renderSnapshot(name, data) {
 function frozen(fn) {
   const RealDate = Date;
   const previousTz = process.env.TZ;
+  const previousWsl = process.env.WSL_DISTRO_NAME;
+  const platformDescriptor = Object.getOwnPropertyDescriptor(process, "platform");
+  const readFileSync = fs.readFileSync;
   const { freemem, totalmem, hostname, userInfo } = os;
 
   class FixedDate extends RealDate {
@@ -214,6 +217,14 @@ function frozen(fn) {
 
   global.Date = FixedDate;
   process.env.TZ = "UTC";
+  Object.defineProperty(process, "platform", { ...platformDescriptor, value: "linux" });
+  delete process.env.WSL_DISTRO_NAME;
+  fs.readFileSync = function (file, ...args) {
+    if (file === "/proc/version") {
+      return "Linux version";
+    }
+    return readFileSync.call(fs, file, ...args);
+  };
   os.freemem = () => 6 * GIB;
   os.totalmem = () => 16 * GIB;
   os.hostname = () => "devbox";
@@ -228,6 +239,13 @@ function frozen(fn) {
     } else {
       process.env.TZ = previousTz;
     }
+    Object.defineProperty(process, "platform", platformDescriptor);
+    if (previousWsl === undefined) {
+      delete process.env.WSL_DISTRO_NAME;
+    } else {
+      process.env.WSL_DISTRO_NAME = previousWsl;
+    }
+    fs.readFileSync = readFileSync;
     os.freemem = freemem;
     os.totalmem = totalmem;
     os.hostname = hostname;

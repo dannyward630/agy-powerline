@@ -8,6 +8,8 @@ const { record } = require("../helpers");
 const { renderStatusline, defaultConfig } = require("../../src/lib/shared");
 const { shortModelName, shouldBlink, resolveQuotaThresholds } = require("../../src/lib/formatters");
 const { buildCustomTheme, THEMES } = require("../../src/lib/themes");
+const { editFields: widgetEditFields } = require("../../src/lib/widget-options");
+const { isVisibilityThreshold } = require("../../src/lib/widget-style");
 
 const strip = (text) => text.replace(/\x1b\[[0-9;]*m/g, "");
 const fixture = (name) =>
@@ -23,15 +25,79 @@ function render(data, widgets, options = {}) {
   );
 }
 
+function withPlatform(platform, wsl, fn) {
+  const platformDescriptor = Object.getOwnPropertyDescriptor(process, "platform");
+  const previousWsl = process.env.WSL_DISTRO_NAME;
+  const readFileSync = fs.readFileSync;
+
+  Object.defineProperty(process, "platform", { ...platformDescriptor, value: platform });
+  if (wsl) {
+    process.env.WSL_DISTRO_NAME = "Ubuntu";
+  } else {
+    delete process.env.WSL_DISTRO_NAME;
+  }
+  fs.readFileSync = function (file, ...args) {
+    if (file === "/proc/version") {
+      return "Linux version";
+    }
+    return readFileSync.call(fs, file, ...args);
+  };
+
+  try {
+    return fn();
+  } finally {
+    Object.defineProperty(process, "platform", platformDescriptor);
+    if (previousWsl === undefined) {
+      delete process.env.WSL_DISTRO_NAME;
+    } else {
+      process.env.WSL_DISTRO_NAME = previousWsl;
+    }
+    fs.readFileSync = readFileSync;
+  }
+}
+
 async function run() {
   testTightestQuota();
+  testWidgetThresholds();
   testSplitTokens();
   testShortModel();
   testOneFormPerSetting();
   testTasks();
   testMode();
   testTitle();
+  testOsWidget();
   testHost();
+}
+
+function testOsWidget() {
+  const data = fixture("antigravity-1.3.0.json");
+  const widgets = [{ id: "os" }];
+  const platforms = [
+    ["win32", false, "Windows", "🪟"],
+    ["darwin", false, "macOS", "🍎"],
+    ["linux", false, "Linux", "🐧"],
+    ["linux", true, "WSL", "🐧"],
+    ["freebsd", false, "FreeBSD", "💻"],
+    ["haiku", false, "haiku", "💻"],
+  ];
+  const icons = ["🪟", "🍎", "🐧", "💻"];
+
+  for (const [platform, wsl, name, icon] of platforms) {
+    withPlatform(platform, wsl, () => {
+      for (const layout of LAYOUT_ORDER) {
+        const output = render(data, widgets, { layout });
+        record(`${layout} os widget shows ${name}`, output.includes(`${icon} ${name}`), output);
+
+        const asciiOutput = render(data, widgets, { layout, ascii: true });
+        record(
+          `${layout} os widget shows ${name} without emoji in ASCII mode`,
+          asciiOutput.includes(name) &&
+            icons.every((candidate) => !asciiOutput.includes(candidate)),
+          asciiOutput
+        );
+      }
+    });
+  }
 }
 
 function testHost() {
@@ -44,6 +110,23 @@ function testHost() {
   const widgets = [{ id: "host" }];
   const payload = fixture("antigravity-1.3.0.json");
   record("host stays opt-in", !defaultConfig().widgets.some((widget) => widget.id === "host"));
+
+  // Without a host widget, a refresh asks the OS for neither name.
+  let lookups = 0;
+  os.hostname = () => {
+    lookups++;
+    return "devbox";
+  };
+  os.userInfo = () => {
+    lookups++;
+    return { username: "alex" };
+  };
+  render(payload, [{ id: "model" }]);
+  record(
+    "a bar without host does not look up the user or hostname",
+    lookups === 0,
+    String(lookups)
+  );
 
   try {
     os.hostname = () => "devbox.example.test";
@@ -312,6 +395,189 @@ function testTightestQuota() {
     "lines quota shows the bucket, % left and reset",
     /Quota: 7d 28\.6% rem · 11hr 35m/.test(strip(lines)),
     lines
+  );
+}
+
+function withRemaining(data, key, remaining) {
+  return {
+    ...data,
+    quota: {
+      ...data.quota,
+      [key]: {
+        ...data.quota?.[key],
+        remaining_fraction: remaining / 100,
+        reset_in_seconds: 600,
+        disabled: false,
+      },
+    },
+  };
+}
+
+function withRemainingFor(data, keys, remaining) {
+  return keys.reduce((payload, key) => withRemaining(payload, key, remaining), data);
+}
+
+function withContextUsed(data, used) {
+  return {
+    ...data,
+    context_window: { ...data.context_window, used_percentage: used },
+  };
+}
+
+function testWidgetThresholds() {
+  const real = fixture("antigravity-1.3.0.json");
+  const quotaWidgets = [
+    { id: "quota", keys: ["gemini-5h", "gemini-weekly"] },
+    { id: "fiveHourBar", keys: ["gemini-5h"] },
+    { id: "fiveHourPct", keys: ["gemini-5h"] },
+    { id: "weeklyBar", keys: ["gemini-weekly"] },
+    { id: "weeklyPct", keys: ["gemini-weekly"] },
+    { id: "thirdPartyFiveHour", keys: ["3p-5h"] },
+    { id: "thirdPartyWeekly", keys: ["3p-weekly"] },
+    { id: "argonWeekly", keys: ["gemini-argon-wtu-weekly"] },
+    { id: "fiveHourReset", keys: ["gemini-5h"] },
+    { id: "weeklyReset", keys: ["gemini-weekly"] },
+    { id: "argonReset", keys: ["gemini-argon-wtu-weekly"] },
+  ];
+
+  for (const layout of LAYOUT_ORDER) {
+    for (const { id, keys } of quotaWidgets) {
+      const widget = { id, showBelow: 50 };
+      const above = render(withRemainingFor(real, keys, 60), [widget], { layout });
+      const at = render(withRemainingFor(real, keys, 50), [widget], { layout });
+      const below = render(withRemainingFor(real, keys, 40), [widget], { layout });
+      record(`${layout} ${id} hides above showBelow`, above.trim() === "", above);
+      record(`${layout} ${id} shows at showBelow`, at.trim() !== "", at);
+      record(`${layout} ${id} shows below showBelow`, below.trim() !== "", below);
+    }
+  }
+
+  const resetWidgets = [
+    { id: "fiveHourReset", own: "gemini-5h", other: "gemini-weekly" },
+    { id: "weeklyReset", own: "gemini-weekly", other: "gemini-5h" },
+    { id: "argonReset", own: "gemini-argon-wtu-weekly", other: "gemini-weekly" },
+  ];
+  for (const layout of LAYOUT_ORDER) {
+    for (const { id, own, other } of resetWidgets) {
+      const ownAbove = withRemaining(withRemaining(real, own, 80), other, 10);
+      const ownBelow = withRemaining(withRemaining(real, own, 20), other, 80);
+      record(
+        `${layout} ${id} follows its own quota when another quota is lower`,
+        render(ownAbove, [{ id, showBelow: 50 }], { layout }).trim() === ""
+      );
+      record(
+        `${layout} ${id} appears when its own quota is below the threshold`,
+        render(ownBelow, [{ id, showBelow: 50 }], { layout }).trim() !== ""
+      );
+    }
+  }
+
+  const contextWidgets = ["context", "contextPct", "contextTokens"];
+  for (const layout of LAYOUT_ORDER) {
+    for (const id of contextWidgets) {
+      const widget = { id, showAbove: 60 };
+      const below = render(withContextUsed(real, 59), [widget], { layout });
+      const at = render(withContextUsed(real, 60), [widget], { layout });
+      const above = render(withContextUsed(real, 61), [widget], { layout });
+      record(`${layout} ${id} hides below showAbove`, below.trim() === "", below);
+      record(`${layout} ${id} shows at showAbove`, at.trim() !== "", at);
+      record(`${layout} ${id} shows above showAbove`, above.trim() !== "", above);
+    }
+  }
+
+  const invalid = [null, "50", -1, 101, NaN, Infinity];
+  record(
+    "visibility thresholds accept only finite numeric percentages from 0 to 100",
+    [0, 50, 100].every(isVisibilityThreshold) &&
+      invalid.every((value) => !isVisibilityThreshold(value))
+  );
+  for (const layout of LAYOUT_ORDER) {
+    for (const value of invalid) {
+      record(
+        `${layout} invalid showBelow ${String(value)} is ignored`,
+        render(withRemaining(real, "gemini-5h", 80), [{ id: "fiveHourPct", showBelow: value }], {
+          layout,
+        }).trim() !== ""
+      );
+      record(
+        `${layout} invalid showAbove ${String(value)} is ignored`,
+        render(withContextUsed(real, 12), [{ id: "contextPct", showAbove: value }], {
+          layout,
+        }).trim() !== ""
+      );
+    }
+  }
+
+  for (const layout of LAYOUT_ORDER) {
+    record(
+      `${layout} showBelow accepts the 0% and 100% boundaries`,
+      render(withRemaining(real, "gemini-5h", 1), [{ id: "fiveHourPct", showBelow: 0 }], {
+        layout,
+      }).trim() === "" &&
+        render(withRemaining(real, "gemini-5h", 0), [{ id: "fiveHourPct", showBelow: 0 }], {
+          layout,
+        }).trim() !== "" &&
+        render(withRemaining(real, "gemini-5h", 100), [{ id: "fiveHourPct", showBelow: 100 }], {
+          layout,
+        }).trim() !== ""
+    );
+    record(
+      `${layout} showAbove accepts the 0% and 100% boundaries`,
+      render(withContextUsed(real, 0), [{ id: "contextPct", showAbove: 0 }], { layout }).trim() !==
+        "" &&
+        render(withContextUsed(real, 99), [{ id: "contextPct", showAbove: 100 }], {
+          layout,
+        }).trim() === "" &&
+        render(withContextUsed(real, 100), [{ id: "contextPct", showAbove: 100 }], {
+          layout,
+        }).trim() !== ""
+    );
+  }
+
+  for (const layout of LAYOUT_ORDER) {
+    const widgets = [
+      { id: "model" },
+      { id: "separator" },
+      { id: "weeklyBar", showBelow: 20 },
+      { id: "separator" },
+      { id: "git" },
+    ];
+    const data = {
+      ...withRemainingFor(real, ["gemini-5h", "gemini-weekly"], 60),
+      vcs: { type: "git", branch: "main", dirty: false },
+    };
+    const output = render(data, widgets, { layout, ascii: true, color: "truecolor" });
+    const expected = render(data, [{ id: "model" }, { id: "separator" }, { id: "git" }], {
+      layout,
+      ascii: true,
+      color: "truecolor",
+    });
+    record(`${layout} hidden quota widget leaves no extra separator`, output === expected, output);
+  }
+
+  for (const { id } of quotaWidgets) {
+    const field = widgetEditFields({ id }).find(({ key }) => key === "showBelow");
+    record(
+      `configure exposes showBelow for ${id}`,
+      field?.number === 50 &&
+        field.show(undefined) === "always" &&
+        field.show(101) === "always" &&
+        field.help === "Shows the widget only when this share or less is left."
+    );
+  }
+  for (const id of contextWidgets) {
+    const field = widgetEditFields({ id }).find(({ key }) => key === "showAbove");
+    record(
+      `configure exposes showAbove for ${id}`,
+      field?.number === 50 &&
+        field.show(undefined) === "always" &&
+        field.show(null) === "always" &&
+        field.help === "Shows the widget only when this share or more is used."
+    );
+  }
+  record(
+    "configure leaves visibility thresholds off unrelated widgets",
+    !widgetEditFields({ id: "model" }).some(({ key }) => key === "showBelow" || key === "showAbove")
   );
 }
 

@@ -156,6 +156,7 @@ Prévisualisez tous les thèmes avec `npx agy-powerline theme --gallery`.
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Tokens de la session et utilisation du cache des prompts                                                             |
 | `tokensToday`, `tokensWeek`                                   | Tokens utilisés aujourd’hui et sur les 7 derniers jours, toutes conversations confondues (Node 22.13+)               |
 | `ram`                                                         | Mémoire utilisée sur votre machine                                                                                   |
+| `os`                                                          | System agy runs on: Windows, macOS, Linux or WSL                                                                     |
 | `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                                          |
 | `customText`, `exec`                                          | Texte personnalisé ou résultat d’une [commande shell](docs/configuration.md#shell-command-widget-exec)               |
 

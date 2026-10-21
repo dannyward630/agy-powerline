@@ -123,6 +123,13 @@ const WIDGET_CATALOG = [
     summary: "project folder name",
   },
   {
+    id: "os",
+    label: "Operating System",
+    unique: true,
+    description: "system agy runs on, including WSL",
+    summary: "system running agy",
+  },
+  {
     id: "host",
     label: "Host",
     unique: true,
