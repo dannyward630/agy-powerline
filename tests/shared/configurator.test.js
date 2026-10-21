@@ -188,7 +188,7 @@ async function run() {
       const agy = browser.AgyConfigurator;
       return agy
         .renderStatusline(agy.sampleData(), { ...agy.defaultConfig(), widgets: [{ id: "os" }] })
-        .replace(/[[0-9;]*m/g, "");
+        .replace(/\x1b\[[0-9;]*m/g, "");
     };
     record(
       "the os widget previews the viewer's own system",
