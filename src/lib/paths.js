@@ -157,7 +157,7 @@ function windowsLauncherBody(nodePath = process.execPath) {
   return [
     "@echo off",
     "setlocal DisableDelayedExpansion",
-    `"${node}" "%~dp0statusline.js"`,
+    `"${node}" "%~dp0statusline.js" %*`,
     "",
   ].join("\r\n");
 }

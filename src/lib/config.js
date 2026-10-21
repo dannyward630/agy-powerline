@@ -3,9 +3,9 @@
 const fs = require("fs");
 const path = require("path");
 const { resolveColorModeId } = require("./colors");
-const { resolveThemeId, normalizeGradient } = require("./themes");
+const { resolveThemeId, canonicalThemeId, THEMES, normalizeGradient } = require("./themes");
 const { stripControl, normalizeClock } = require("./formatters");
-const { normalizePowerline } = require("./powerline");
+const { normalizePowerline, applyStyle, STYLES } = require("./powerline");
 const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 const { isMeterStyle } = require("./widget-style");
 
@@ -406,6 +406,69 @@ function applyPreset(baseConfig, presetName) {
   });
 }
 
+// Apply one-render settings without writing them to the user's config. Invalid
+// values are reported by name only so callers can show or log a safe error.
+function applyRenderOverrides(baseConfig, overrides = {}) {
+  let config = mergeConfig(baseConfig);
+  const invalid = [];
+
+  if (overrides.preset !== undefined) {
+    const preset =
+      typeof overrides.preset === "string" ? overrides.preset.trim().toLowerCase() : "";
+    if (Object.hasOwn(PRESETS, preset)) {
+      config = applyPreset(config, preset);
+    } else {
+      invalid.push("preset");
+    }
+  }
+
+  if (overrides.layout !== undefined) {
+    const layout =
+      typeof overrides.layout === "string" ? overrides.layout.trim().toLowerCase() : "";
+    if (Object.hasOwn(LAYOUTS, layout)) {
+      config = mergeConfig({ ...config, layout });
+    } else {
+      invalid.push("layout");
+    }
+  }
+
+  if (overrides.theme !== undefined) {
+    const theme = canonicalThemeId(overrides.theme);
+    if (Object.hasOwn(THEMES, theme)) {
+      config = mergeConfig({ ...config, theme });
+    } else {
+      invalid.push("theme");
+    }
+  }
+
+  if (overrides.caps !== undefined) {
+    const caps = typeof overrides.caps === "string" ? overrides.caps.trim().toLowerCase() : "";
+    if (Object.hasOwn(STYLES, caps)) {
+      config = mergeConfig({ ...config, powerline: applyStyle(config.powerline, caps) });
+    } else {
+      invalid.push("caps");
+    }
+  }
+
+  if (overrides.gradient !== undefined) {
+    const gradient = typeof overrides.gradient === "string" ? overrides.gradient.trim() : "";
+    if (gradient.toLowerCase() === "off") {
+      const withoutGradient = { ...config };
+      delete withoutGradient.gradient;
+      config = mergeConfig(withoutGradient);
+    } else {
+      const normalized = normalizeGradient(gradient);
+      if (normalized) {
+        config = mergeConfig({ ...config, gradient: normalized });
+      } else {
+        invalid.push("gradient");
+      }
+    }
+  }
+
+  return { config, invalid };
+}
+
 module.exports = {
   setConfigDir,
   getConfigDir,
@@ -424,4 +487,5 @@ module.exports = {
   PRESETS,
   PRESET_ORDER,
   applyPreset,
+  applyRenderOverrides,
 };

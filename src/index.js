@@ -16,7 +16,13 @@ const { importCommand } = require("./cli/import");
 const { doctorCommand } = require("./cli/doctor");
 const { uninstallCommand } = require("./cli/uninstall");
 const { reportCommand } = require("./cli/report");
-const { setConfigDir, readConfigFile, renderStatusline, sampleData } = require("./lib/shared");
+const {
+  setConfigDir,
+  readConfigFile,
+  renderStatusline,
+  sampleData,
+  applyRenderOverrides,
+} = require("./lib/shared");
 const { resolveInstallDir, isTrustedInstallDir } = require("./lib/paths");
 const { isLogEnabled, setLogDir, logError, jsonErrorMessage } = require("./lib/log");
 const { dumpTarget, writePayloadDump } = require("./lib/payload-dump");
@@ -205,6 +211,19 @@ const COMMANDS = [
         value: "<mode>",
         help: "truecolor, 256, or none (overrides config and env)",
       },
+      preset: { type: "string", value: "<id>", help: "use preset widgets for this render only" },
+      layout: {
+        type: "string",
+        value: "<id>",
+        help: "use pills, lines, or classic for this render",
+      },
+      theme: { type: "string", value: "<id>", help: "use a theme id or dark, light, colorblind" },
+      caps: { type: "string", value: "<style>", help: "use round, angled, slanted, or flat" },
+      gradient: {
+        type: "string",
+        value: "<name|colors>",
+        help: "use a gradient preset, hex stops, or off",
+      },
       "dump-payload": {
         type: "string",
         value: "<path>",
@@ -350,7 +369,22 @@ function dumpPayloadIfRequested(rawInput, dumpOption, installDir) {
 function renderFromStdin(options = {}) {
   const installDir = resolveInstallDir();
   setConfigDir(installDir);
-  const { config, error: configError } = readConfigFile();
+  const { config: savedConfig, error: configError } = readConfigFile();
+  const { config, invalid } = applyRenderOverrides(savedConfig, options);
+
+  if (invalid.length) {
+    const name = invalid[0];
+    const choices = {
+      preset: "default, compact, agent, git, tokens, quotas, full",
+      layout: "pills, lines, classic",
+      theme: "a theme id, dark, light, or colorblind",
+      caps: "round, angled, slanted, flat",
+      gradient: "a preset, hex stops, or off",
+    };
+    fail(`invalid --${name} value; use ${choices[name]}.`);
+    return;
+  }
+
   const overrides = { ...renderOverrides(options), configError };
 
   if (configError) {

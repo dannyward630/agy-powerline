@@ -358,10 +358,23 @@ function testDoctor() {
       `exit ${res.code}: ${out.slice(-300)}`
     );
 
+    const settings = readJson(box.settingsPath);
+    settings.statusLine.command += " --theme light-paper --layout lines";
+    writeSettings(box, settings);
+    const overrideDoctor = stripAnsi(runCli(["doctor"], { env: box.env }).stdout);
+    record(
+      "doctor lists the configured per-render overrides",
+      /overrides\s+--theme light-paper, --layout lines/.test(overrideDoctor),
+      overrideDoctor.slice(0, 500)
+    );
+
     const markdown = runCli(["doctor", "--markdown"], { env: box.env });
     record(
-      "doctor --markdown shows the home folder as ~",
-      !markdown.stdout.includes(box.home) && /~[\\/]\.agy-powerline/.test(markdown.stdout),
+      "doctor --markdown shows the home folder as ~ and lists render overrides",
+      !markdown.stdout.includes(box.home) &&
+        /~[\\/]\.agy-powerline/.test(markdown.stdout) &&
+        markdown.stdout.includes("**Render Overrides**") &&
+        markdown.stdout.includes("--theme light-paper, --layout lines"),
       markdown.stdout.slice(0, 300)
     );
 
