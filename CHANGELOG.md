@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Folder depth for `cwd` and per-widget maximum widths for selected values (#98)
 - Per-widget quota and context visibility thresholds in the bar and `configure` (#99)
 - Optional `os` widget shows Windows, macOS, Linux or WSL (#63)
 - Opt-in `host` widget shows the current user and short hostname (#62)
+
+### Fixed
+
+- `cwd` widget shows a path written for another OS (a Windows path on Linux or WSL, a POSIX path on Windows) as it is, instead of joining it to the current folder (#134)
 
 ## [1.4.0] - 2026-10-20
 

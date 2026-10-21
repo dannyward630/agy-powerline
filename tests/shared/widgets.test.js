@@ -6,9 +6,24 @@ const os = require("os");
 const path = require("path");
 const { record } = require("../helpers");
 const { renderStatusline, defaultConfig } = require("../../src/lib/shared");
-const { shortModelName, shouldBlink, resolveQuotaThresholds } = require("../../src/lib/formatters");
+const {
+  shortModelName,
+  shouldBlink,
+  resolveQuotaThresholds,
+  limitWidth,
+  isValidMaxWidth,
+  shortenPath,
+  isValidDepth,
+  visibleWidth,
+} = require("../../src/lib/formatters");
 const { buildCustomTheme, THEMES } = require("../../src/lib/themes");
-const { editFields: widgetEditFields } = require("../../src/lib/widget-options");
+const { buildSegment } = require("../../src/lib/layouts/pills");
+const { buildLinesSegment, deriveLinesPalette } = require("../../src/lib/layouts/lines");
+const {
+  editFields: widgetEditFields,
+  MAX_WIDTH_WIDGETS,
+  stepNumberField,
+} = require("../../src/lib/widget-options");
 const { isVisibilityThreshold } = require("../../src/lib/widget-style");
 
 const strip = (text) => text.replace(/\x1b\[[0-9;]*m/g, "");
@@ -65,6 +80,7 @@ async function run() {
   testTasks();
   testMode();
   testTitle();
+  testWidgetWidthAndDepth();
   testOsWidget();
   testHost();
 }
@@ -244,6 +260,248 @@ function testTitle() {
   const untitled = { ...real };
   delete untitled.conversation_title;
   record("title hides until the conversation has one", !/💬/.test(render(untitled, title)));
+}
+
+function testWidgetWidthAndDepth() {
+  const paths = [
+    { path: "~/a/b/c/d", shown: "~/…/c/d", ascii: "~/.../c/d" },
+    { path: "C:\\x\\y\\z", shown: "C:\\…\\y\\z", ascii: "C:\\...\\y\\z" },
+    { path: "/a/b", shown: "/a/b", ascii: "/a/b" },
+    { path: "~", shown: "~", ascii: "~" },
+  ];
+  for (const layout of LAYOUT_ORDER) {
+    for (const ascii of [false, true]) {
+      for (const { path: cwd, shown, ascii: asciiShown } of paths) {
+        const expected = ascii ? asciiShown : shown;
+        const output = render(
+          { ...fixture("antigravity-1.3.0.json"), cwd },
+          [{ id: "cwd", depth: 2 }],
+          { layout, ascii }
+        );
+        record(
+          `${layout} cwd depth shortens ${cwd}`,
+          output.includes(expected) && (!ascii || !/[^\x00-\x7f]/.test(output)),
+          output
+        );
+      }
+    }
+  }
+
+  const value = "abcdefghijklmnop";
+  const widthWidgets = [
+    {
+      widget: { id: "cwd", maxWidth: 8 },
+      data: { cwd: `/${value}` },
+      shown: "/abcdef…",
+      ascii: "/abcd...",
+    },
+    {
+      widget: { id: "project", maxWidth: 8 },
+      data: { workspace: { project_dir: `/root/${value}` } },
+      shown: "abcdefg…",
+      ascii: "abcde...",
+    },
+    {
+      widget: { id: "git", maxWidth: 8 },
+      data: { vcs: { type: "git", branch: value, dirty: true, ahead: 2, behind: 1 } },
+      shown: "abcdefg…",
+      ascii: "abcde...",
+    },
+    {
+      widget: { id: "title", maxWidth: 8 },
+      data: { conversation_title: value },
+      shown: "abcdefg…",
+      ascii: "abcde...",
+    },
+    {
+      widget: { id: "model", maxWidth: 8 },
+      data: { model: { display_name: value } },
+      shown: "abcdefg…",
+      ascii: "abcde...",
+    },
+    {
+      widget: { id: "customText", text: value, maxWidth: 8 },
+      data: {},
+      shown: "abcdefg…",
+      ascii: "abcde...",
+    },
+  ];
+  for (const layout of LAYOUT_ORDER) {
+    for (const { widget, data, shown, ascii: asciiShown } of widthWidgets) {
+      const base = { ...fixture("antigravity-1.3.0.json"), ...data };
+      for (const ascii of [false, true]) {
+        const expected = ascii ? asciiShown : shown;
+        const output = render(base, [widget], { layout, ascii });
+        record(
+          `${layout} ${widget.id} maxWidth clips to ${expected}`,
+          output.includes(expected) && (!ascii || !/[^\x00-\x7f]/.test(output)),
+          output
+        );
+      }
+      for (const invalid of [0, -1, "5", 1e9, null]) {
+        const output = render(base, [{ ...widget, maxWidth: invalid }], { layout });
+        const unchanged = render(base, [{ ...widget, maxWidth: undefined }], { layout });
+        record(
+          `${layout} ${widget.id} ignores invalid maxWidth ${String(invalid)}`,
+          output === unchanged
+        );
+      }
+    }
+  }
+
+  const invalidDepths = [0, -1, "2", 1e9, null];
+  for (const layout of LAYOUT_ORDER) {
+    const base = { ...fixture("antigravity-1.3.0.json"), cwd: "/a/b/c/d" };
+    const original = render(base, [{ id: "cwd" }], { layout });
+    for (const depth of invalidDepths) {
+      record(
+        `${layout} cwd ignores invalid depth ${String(depth)}`,
+        render(base, [{ id: "cwd", depth }], { layout }) === original
+      );
+    }
+  }
+
+  for (const layout of LAYOUT_ORDER) {
+    const data = {
+      ...fixture("antigravity-1.3.0.json"),
+      cwd: "/very/long/folders/with/a/name-that-will-not-fit",
+    };
+    const output = render(data, [{ id: "cwd", depth: 2, maxWidth: 10 }, { id: "model" }], {
+      layout,
+      width: 40,
+    });
+    record(
+      `${layout} cwd maxWidth applies before terminal fitting`,
+      visibleWidth(output) <= 40 && output.includes("…") && /Gemini/.test(output),
+      output
+    );
+  }
+
+  const cjk = limitWidth("A猫BC", { maxWidth: 4 });
+  const cjkAscii = limitWidth("A猫BC", { maxWidth: 4 }, true);
+  const emoji = limitWidth("A💾BCD", { maxWidth: 5 });
+  const emojiAscii = limitWidth("A💾BCDE", { maxWidth: 6 }, true);
+  const colored = limitWidth("\x1b[31mabcdefghijkl\x1b[0m", { maxWidth: 8 });
+  record(
+    "maxWidth counts CJK and emoji as two columns in Unicode and ASCII modes",
+    cjk === "A猫…" &&
+      cjkAscii === "A..." &&
+      emoji === "A💾B…" &&
+      emojiAscii === "A💾..." &&
+      visibleWidth(cjk) === 4 &&
+      visibleWidth(emoji) === 5 &&
+      colored === "\x1b[31mabcdefg…\x1b[0m" &&
+      visibleWidth(colored) === 8
+  );
+
+  const gitSession = {
+    git: { branch: value, dirty: true, ahead: 2, behind: 1 },
+    exceeds200k: false,
+  };
+  const gitWidget = { id: "git", maxWidth: 8 };
+  const colors = THEMES["dark-aurora"].colors;
+  for (const layout of LAYOUT_ORDER) {
+    for (const ascii of [false, true]) {
+      const output =
+        layout === "pills"
+          ? buildSegment("git", gitSession, colors, !ascii, ascii, gitWidget, { layout }).text
+          : buildLinesSegment(
+              "git",
+              gitSession,
+              deriveLinesPalette(colors),
+              !ascii,
+              ascii,
+              gitWidget,
+              { layout, widgets: [gitWidget] }
+            );
+      const branch = ascii ? "abcde..." : "abcdefg…";
+      const marker = layout === "pills" ? (ascii ? `* ${branch}` : `● ${branch}`) : `${branch}*`;
+      const sync = ascii ? "^2 v1" : "⇡2 ⇣1";
+      record(
+        `${layout} git maxWidth clips only the branch, keeping its marker and sync counts`,
+        strip(output).includes(marker) && strip(output).includes(sync),
+        strip(output)
+      );
+    }
+  }
+
+  // A memo that already holds the output stands in for running the command.
+  const execWidget = { id: "exec", cmd: "echo hi", maxWidth: 4 };
+  const ranSession = {
+    execMode: "run",
+    execMemo: { has: () => true, get: () => value, set: () => {} },
+    exceeds200k: false,
+  };
+  for (const layout of LAYOUT_ORDER) {
+    const preview = render(fixture("antigravity-1.3.0.json"), [execWidget], { layout });
+    record(`${layout} exec maxWidth leaves the [cmd] preview whole`, preview.includes("[cmd]"));
+    const ran =
+      layout === "pills"
+        ? buildSegment("exec", ranSession, colors, true, false, execWidget, { layout }).text
+        : buildLinesSegment(
+            "exec",
+            ranSession,
+            deriveLinesPalette(colors),
+            true,
+            false,
+            execWidget,
+            {
+              layout,
+              widgets: [execWidget],
+            }
+          );
+    record(
+      `${layout} exec maxWidth clips the command's output`,
+      strip(ran).includes("abc…") && !strip(ran).includes(value),
+      strip(ran)
+    );
+  }
+
+  const validWidths = [4, 50, 200];
+  const invalidWidths = [0, -1, "5", 1e9, null, NaN, Infinity];
+  const validDepth = [1, 10];
+  record(
+    "maxWidth and depth validate only their documented integer ranges",
+    validWidths.every(isValidMaxWidth) &&
+      invalidWidths.every((width) => !isValidMaxWidth(width)) &&
+      validDepth.every(isValidDepth) &&
+      invalidDepths.every((depth) => !isValidDepth(depth)) &&
+      invalidWidths.every((width) => limitWidth("value", { maxWidth: width }) === "value") &&
+      shortenPath("~/a/b/c", 0) === "~/a/b/c"
+  );
+
+  const maxWidthIds = [
+    "cwd",
+    "project",
+    "git",
+    "title",
+    "model",
+    "customText",
+    "exec",
+    "gitWorktree",
+  ];
+  const depthField = widgetEditFields({ id: "cwd" }).find(({ key }) => key === "depth");
+  const maxWidthField = widgetEditFields({ id: "model" }).find(({ key }) => key === "maxWidth");
+  const warnField = widgetEditFields({ id: "fiveHourBar" }).find(({ key }) => key === "warn");
+  record(
+    "configure exposes Folder depth and a bounded Max width control",
+    JSON.stringify([...MAX_WIDTH_WIDGETS].sort()) === JSON.stringify([...maxWidthIds].sort()) &&
+      JSON.stringify(depthField?.values) === JSON.stringify([undefined, 1, 2, 3, 4]) &&
+      depthField.show(undefined) === "full path" &&
+      depthField.show(0) === "full path" &&
+      maxWidthField.number === 10 &&
+      maxWidthField.step === 5 &&
+      maxWidthField.min === 10 &&
+      maxWidthField.max === 80 &&
+      stepNumberField(maxWidthField, undefined, 1) === 15 &&
+      stepNumberField(maxWidthField, 75, 1) === 80 &&
+      stepNumberField(maxWidthField, 80, 1) === 80 &&
+      stepNumberField(maxWidthField, 10, -1) === 10 &&
+      stepNumberField(maxWidthField, "bad", 1) === 15 &&
+      stepNumberField(warnField, 30, 1) === 35 &&
+      maxWidthField.show(undefined) === "no limit" &&
+      maxWidthField.show(201) === "no limit"
+  );
 }
 
 function testMode() {

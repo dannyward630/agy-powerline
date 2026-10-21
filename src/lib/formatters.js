@@ -374,7 +374,23 @@ function homePath(value) {
     return "";
   }
 
-  const resolved = path.resolve(String(value));
+  const input = String(value);
+  if (input === "~" || /^~[\\/]/.test(input)) {
+    return input;
+  }
+  const windowsAbsolute = /^[a-z]:[\\/]|^\\\\/i.test(input);
+  const posixAbsolute = input.startsWith("/");
+
+  // Payload paths can come from another OS. Preserve absolute paths in that
+  // format instead of resolving them relative to this machine's cwd.
+  if (
+    (windowsAbsolute && process.platform !== "win32") ||
+    (posixAbsolute && process.platform === "win32")
+  ) {
+    return input;
+  }
+
+  const resolved = path.resolve(input);
   const home = path.resolve(os.homedir());
   const prefix =
     process.platform === "win32"
@@ -386,6 +402,59 @@ function homePath(value) {
   }
 
   return resolved;
+}
+
+function isValidDepth(value) {
+  return Number.isInteger(value) && value >= 1 && value <= 10;
+}
+
+// Keep the path's root and final `depth` folders, replacing any middle
+// folders with one ellipsis. Accept either OS's path separators on every OS.
+function shortenPath(value, depth, ascii = false) {
+  const text = String(value ?? "");
+  if (!text || !isValidDepth(depth)) {
+    return text;
+  }
+
+  let root = "";
+  let rest = text;
+  let separator = text.match(/[\\/]/)?.[0] || "/";
+  const unc = text.match(/^(\\\\[^\\/]+[\\/][^\\/]+)([\\/])?(.*)$/);
+  const drive = text.match(/^([a-z]:)([\\/])(.*)$/i);
+
+  if (unc) {
+    root = unc[1];
+    separator = unc[2] || separator;
+    rest = unc[3];
+  } else if (drive) {
+    root = drive[1];
+    separator = drive[2];
+    rest = drive[3];
+  } else if (text === "~" || /^~[\\/]/.test(text)) {
+    root = "~";
+    if (text.length > 1) {
+      separator = text[1];
+      rest = text.slice(2);
+    } else {
+      rest = "";
+    }
+  } else if (text[0] === "/" || text[0] === "\\") {
+    root = text[0];
+    separator = text[0];
+    rest = text.slice(1);
+  }
+
+  const folders = rest.split(/[\\/]+/).filter(Boolean);
+  if (folders.length <= depth) {
+    return text;
+  }
+
+  const suffix = folders.slice(-depth).join(separator);
+  const ellipsis = ascii ? "..." : "…";
+  if (root === "/" || root === "\\") {
+    return `${root}${ellipsis}${separator}${suffix}`;
+  }
+  return `${root ? `${root}${separator}` : ""}${ellipsis}${separator}${suffix}`;
 }
 
 function label(emojis, emoji, named, value) {
@@ -560,15 +629,44 @@ function clipText(text, max, ascii = false) {
   const ellipsis = ascii ? "..." : "…";
   let out = "";
   let width = 0;
-  for (const char of value) {
-    const w = charWidth(char.codePointAt(0));
+  let index = 0;
+  const escape = /\x1b(?:\[[0-?]*[ -/]*[@-~]|\]8;;[^\x1b\x07]*(?:\x07|\x1b\\))/y;
+  while (index < value.length) {
+    if (value[index] === "\x1b") {
+      escape.lastIndex = index;
+      const match = escape.exec(value);
+      if (match) {
+        out += match[0];
+        index += match[0].length;
+        continue;
+      }
+    }
+
+    const code = value.codePointAt(index);
+    const char = String.fromCodePoint(code);
+    const w = charWidth(code);
     if (width + w > max - ellipsis.length) {
       break;
     }
     out += char;
     width += w;
+    index += char.length;
   }
-  return out.trimEnd() + ellipsis;
+  const clipped = out.trimEnd() + ellipsis;
+  return /\x1b\[[0-?]*[ -/]*m/.test(clipped) ? `${clipped}\x1b[0m` : clipped;
+}
+
+function isValidMaxWidth(value) {
+  return Number.isInteger(value) && value >= 4 && value <= 200;
+}
+
+function limitWidth(value, widget, ascii = false, fallback) {
+  const width = isValidMaxWidth(widget?.maxWidth)
+    ? widget.maxWidth
+    : isValidMaxWidth(fallback)
+      ? fallback
+      : null;
+  return width === null ? value : clipText(value, width, ascii);
 }
 
 // Removes escape sequences and control characters from text that did not
@@ -656,6 +754,10 @@ module.exports = {
   formatTasks,
   formatMode,
   clipText,
+  limitWidth,
+  isValidMaxWidth,
+  shortenPath,
+  isValidDepth,
   quotaColor,
   contextColor,
   resolveQuotaThresholds,
