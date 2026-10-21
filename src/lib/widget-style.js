@@ -228,10 +228,13 @@ function hiddenByThreshold(id, widget, session) {
     );
   }
 
+  // Past 200k tokens the context widgets are in danger: they show whatever
+  // the percentage says.
   if (CONTEXT_WIDGETS.has(id) && isVisibilityThreshold(widget?.showAbove)) {
     const used = session?.contextPct;
     return (
       session?.hasContext === true &&
+      !session?.exceeds200k &&
       typeof used === "number" &&
       Number.isFinite(used) &&
       used < widget.showAbove

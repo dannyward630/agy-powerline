@@ -419,7 +419,8 @@ function shortenPath(value, depth, ascii = false) {
   let root = "";
   let rest = text;
   let separator = text.match(/[\\/]/)?.[0] || "/";
-  const unc = text.match(/^(\\\\[^\\/]+[\\/][^\\/]+)([\\/])?(.*)$/);
+  // A network share keeps \\server\share (or //server/share) as its root.
+  const unc = text.match(/^([\\/]{2}[^\\/]+[\\/][^\\/]+)([\\/])?(.*)$/);
   const drive = text.match(/^([a-z]:)([\\/])(.*)$/i);
 
   if (unc) {

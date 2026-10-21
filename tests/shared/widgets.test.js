@@ -134,24 +134,24 @@ function testHost() {
   const payload = fixture("antigravity-1.3.0.json");
   record("host stays opt-in", !defaultConfig().widgets.some((widget) => widget.id === "host"));
 
-  // Without a host widget, a refresh asks the OS for neither name.
-  let lookups = 0;
-  os.hostname = () => {
-    lookups++;
-    return "devbox";
-  };
-  os.userInfo = () => {
-    lookups++;
-    return { username: "alex" };
-  };
-  render(payload, [{ id: "model" }]);
-  record(
-    "a bar without host does not look up the user or hostname",
-    lookups === 0,
-    String(lookups)
-  );
-
   try {
+    // Without a host widget, a refresh asks the OS for neither name.
+    let lookups = 0;
+    os.hostname = () => {
+      lookups++;
+      return "devbox";
+    };
+    os.userInfo = () => {
+      lookups++;
+      return { username: "alex" };
+    };
+    render(payload, [{ id: "model" }]);
+    record(
+      "a bar without host does not look up the user or hostname",
+      lookups === 0,
+      String(lookups)
+    );
+
     os.hostname = () => "devbox.example.test";
     os.userInfo = () => ({ username: "alex" });
     delete process.env.USER;
@@ -275,6 +275,11 @@ function testWidgetWidthAndDepth() {
     { path: "C:\\x\\y\\z", shown: "C:\\…\\y\\z", ascii: "C:\\...\\y\\z" },
     { path: "/a/b", shown: "/a/b", ascii: "/a/b" },
     { path: "~", shown: "~", ascii: "~" },
+    {
+      path: "\\\\server\\share\\a\\b\\c",
+      shown: "\\\\server\\share\\…\\b\\c",
+      ascii: "\\\\server\\share\\...\\b\\c",
+    },
   ];
   for (const layout of LAYOUT_ORDER) {
     for (const ascii of [false, true]) {
@@ -355,6 +360,12 @@ function testWidgetWidthAndDepth() {
       }
     }
   }
+
+  record(
+    "cwd depth keeps a //server/share root written with forward slashes",
+    shortenPath("//server/share/a/b/c", 2) === "//server/share/…/b/c" &&
+      shortenPath("//server/share/a/b/c", 2, true) === "//server/share/.../b/c"
+  );
 
   const invalidDepths = [0, -1, "2", 1e9, null];
   for (const layout of LAYOUT_ORDER) {
@@ -772,6 +783,14 @@ function testWidgetThresholds() {
       record(`${layout} ${id} hides below showAbove`, below.trim() === "", below);
       record(`${layout} ${id} shows at showAbove`, at.trim() !== "", at);
       record(`${layout} ${id} shows above showAbove`, above.trim() !== "", above);
+      const danger = render({ ...withContextUsed(real, 20), exceeds_200k_tokens: true }, [widget], {
+        layout,
+      });
+      record(
+        `${layout} ${id} shows past 200k tokens below showAbove`,
+        danger.trim() !== "",
+        danger
+      );
     }
   }
 

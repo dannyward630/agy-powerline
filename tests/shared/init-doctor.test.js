@@ -56,6 +56,7 @@ async function run() {
   testEnabledFalse();
   testCmdBreakingFolder();
   testDoctor();
+  testDoctorMasksHost();
   testUpgradeFromSeparateFiles();
   testChoiceFlags();
   await testChoose();
@@ -372,6 +373,19 @@ function testDoctor() {
       /Installed scripts are v0\.0\.1/.test(stale) && /init --yes/.test(stale)
     );
   });
+}
+
+function testDoctorMasksHost() {
+  const { maskHost } = require("../../src/cli/doctor");
+  const names = { username: "alex", hostname: "devbox" };
+  record(
+    "doctor's bar preview shows user@host instead of the real names",
+    maskHost("🤖 Gemini │ 👤 alex@devbox │ 🌿 main", names) ===
+      "🤖 Gemini │ 👤 user@host │ 🌿 main" &&
+      maskHost("👤 devbox", names) === "👤 host" &&
+      maskHost("📂 ~/devboxes/app", names) === "📂 ~/devboxes/app" &&
+      maskHost("👤 alex@devbox", { username: "", hostname: "" }) === "👤 alex@devbox"
+  );
 }
 
 module.exports = { run };

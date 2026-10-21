@@ -22,6 +22,7 @@ const {
   readConfigFile,
   setConfigDir,
 } = require("../lib/shared");
+const { currentUserAndHost } = require("../lib/session");
 const { runStatuslineCommand } = require("../lib/run");
 const { detectColorDepth } = require("../lib/colors");
 const { readLog, getLogPath } = require("../lib/log");
@@ -53,6 +54,20 @@ function tildify(text) {
     out = out.split(variant).join("~");
   }
   return out;
+}
+
+// The bar preview can hold the host widget's user@host, and doctor output
+// gets pasted into issues: the names become user and host.
+function maskHost(text, { username, hostname } = currentUserAndHost()) {
+  let out = String(text);
+  if (!hostname) {
+    return out;
+  }
+  if (username) {
+    out = out.split(`${username}@${hostname}`).join("user@host");
+  }
+  const escaped = hostname.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return out.replace(new RegExp(`(^|[^\\w.-])${escaped}(?![\\w.-])`, "g"), "$1host");
 }
 
 function stripAnsi(text) {
@@ -216,7 +231,7 @@ async function doctorCommand(options = {}) {
       line("spawn", `${GREEN}ok${RESET} (${ms}ms)`);
       // The flex separator pads to the terminal width; shrink those gaps so
       // the widgets fit in the preview on wide terminals.
-      line("output", preview.replace(/ {3,}/g, "  ").slice(0, 120));
+      line("output", maskHost(preview.replace(/ {3,}/g, "  ")).slice(0, 120));
     } else {
       failed += 1;
       line("spawn", `${RED}failed${RESET} exit ${result.code} (${ms}ms)`);
@@ -244,4 +259,5 @@ async function doctorCommand(options = {}) {
 
 module.exports = {
   doctorCommand,
+  maskHost,
 };

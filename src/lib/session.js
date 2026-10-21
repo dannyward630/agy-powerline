@@ -301,5 +301,6 @@ module.exports = {
   readQuota,
   tightestQuota,
   contextUsedPercent,
+  currentUserAndHost,
   extractSession,
 };
