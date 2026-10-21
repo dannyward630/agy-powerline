@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Folder depth for `cwd` and per-widget maximum widths for selected values (#98)
 - Per-widget quota and context visibility thresholds in the bar and `configure` (#99)
+- `clock` widget shows the current local time, in the 12/24-hour format set under `clock` (#46)
 - Optional `os` widget shows Windows, macOS, Linux or WSL (#63)
 - Opt-in `host` widget shows the current user and short hostname (#62)
 

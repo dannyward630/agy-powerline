@@ -139,6 +139,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | ウィジェット                                                  | 表示内容                                                                                                 |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `model`                                                       | 使用中のモデル                                                                                           |
+| `clock`                                                       | Current local time (12/24-hour format set under `clock`)                                                 |
 | `fiveHourBar`、`weeklyBar`                                    | 5h / 7d クォータの残りをメーターで表示（[ペースマーカー](docs/configuration.md#quota-pace-marker)付き）  |
 | `fiveHourPct`、`weeklyPct`                                    | 5h / 7d クォータの残りをパーセントで表示                                                                 |
 | `fiveHourReset`、`weeklyReset`                                | クォータがリセットされるまでの時間、またはリセット時刻                                                   |

@@ -150,6 +150,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/) or with `npx
 | Widget                                                        | Shows                                                                                                    |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `model`                                                       | The model in use                                                                                         |
+| `clock`                                                       | The current local time (12/24-hour format set under `clock`)                                             |
 | `fiveHourBar`, `weeklyBar`                                    | 5h / 7d quota left as a meter, with a [pace marker](docs/configuration.md#quota-pace-marker)             |
 | `fiveHourPct`, `weeklyPct`                                    | 5h / 7d quota left as a percentage                                                                       |
 | `fiveHourReset`, `weeklyReset`                                | Time until the quota resets, or the reset time                                                           |

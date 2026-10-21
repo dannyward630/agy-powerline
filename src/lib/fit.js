@@ -11,6 +11,7 @@ const DROP_ORDER = [
   "gitStash",
   "gitWorktree",
   "title",
+  "clock",
   "version",
   "cacheCreate",
   "cacheRead",

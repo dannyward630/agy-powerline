@@ -139,6 +139,7 @@ Prévisualisez tous les thèmes avec `npx agy-powerline theme --gallery`.
 | Widget                                                        | Informations affichées                                                                                               |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `model`                                                       | Modèle utilisé                                                                                                       |
+| `clock`                                                       | Current local time (12/24-hour format set under `clock`)                                                             |
 | `fiveHourBar`, `weeklyBar`                                    | Quota restant sur 5h/7d sous forme de jauge, avec un [indicateur de rythme](docs/configuration.md#quota-pace-marker) |
 | `fiveHourPct`, `weeklyPct`                                    | Pourcentage de quota restant sur 5h/7d                                                                               |
 | `fiveHourReset`, `weeklyReset`                                | Temps restant avant la réinitialisation du quota, ou heure de réinitialisation                                       |

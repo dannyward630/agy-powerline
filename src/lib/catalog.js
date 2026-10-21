@@ -272,6 +272,13 @@ const WIDGET_CATALOG = [
     summary: "session tokens, total or split",
   },
   {
+    id: "clock",
+    label: "Clock",
+    unique: true,
+    description: "current local time, in the format set under clock",
+    summary: "current local time",
+  },
+  {
     id: "tokensToday",
     label: "Tokens Today",
     unique: true,

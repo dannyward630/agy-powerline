@@ -139,6 +139,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | 组件                                                          | 显示内容                                                                                                 |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `model`                                                       | 当前使用的模型                                                                                           |
+| `clock`                                                       | Current local time (12/24-hour format set under `clock`)                                                 |
 | `fiveHourBar`、`weeklyBar`                                    | 以进度条显示 5h / 7d 剩余配额，带[进度标记](docs/configuration.md#quota-pace-marker)                     |
 | `fiveHourPct`、`weeklyPct`                                    | 以百分比显示 5h / 7d 剩余配额                                                                            |
 | `fiveHourReset`、`weeklyReset`                                | 距配额重置的时间，或重置时刻                                                                             |

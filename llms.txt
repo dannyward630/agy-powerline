@@ -93,6 +93,7 @@
 - `cacheCreate` — Prompt-cache tokens created.
 - `cacheHit` — Prompt-cache usage.
 - `totalTokens` — Input and output tokens for the session.
+- `clock` — Current local time.
 - `tokensToday` — Tokens used today across conversations.
 - `tokensWeek` — Tokens used over the last 7 days.
 - `exec` — Output from a shell command you configure.
