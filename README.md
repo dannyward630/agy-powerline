@@ -167,6 +167,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/) or with `npx
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Session tokens and prompt cache usage                                                                    |
 | `tokensToday`, `tokensWeek`                                   | Tokens used today and over the last 7 days, all conversations (Node 22.13+)                              |
 | `ram`                                                         | Memory used on your machine                                                                              |
+| `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                              |
 | `customText`, `exec`                                          | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec)       |
 
 A widget with nothing to show hides itself. Widgets can be recolored, made label-free or given their own alert thresholds: see [Configuration](docs/configuration.md).

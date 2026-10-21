@@ -82,3 +82,12 @@ Model: Gemini 3.8 Flash (High){reset}     Context: ####{dim}--------------------
 ## lines · light-paper · gradient sunset
 {fg #806933}🤖 Gemini 3.8 Flash (High){reset}        {fg #a65b3f}💾 {fg #a65b3f}●●●●{fg #c8c8c8}●●●●●●●●●●●●●●●●●●●●●{reset} {fg #a65b3f}149.3K/1.0M (14.2%){reset}        {fg #c53b69}🌿 (main{fg #b04a00}*{fg #c53b69}){reset}
 {fg #806933}{fg #806933}●{fg #806933}●{fg #806933}●{fg #806933}●{fg #806933}●{fg #806933}●{fg #806933}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #806933}┃{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{reset} {fg #806933}72.0% rem{reset} {dim}│{reset} {fg #99623b}2hr 47m{reset}           {fg #ae534c}{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #8d6503}●{fg #ae534c}┃{fg #8d6503}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{fg #c8c8c8}●{reset} {fg #8d6503}21.0% rem{reset} {dim}│{reset} {fg #c53b69}1d 17h{reset}{reset}
+
+## host widget · pills
+{bold} 🖥️ alex@devbox {/bold}{reset}
+
+## host widget · lines
+🖥️ alex@devbox{reset}{reset}
+
+## host widget · classic
+🖥️ alex@devbox{reset}{reset}

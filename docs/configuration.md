@@ -54,7 +54,7 @@ Enter on a widget opens its options: color, label (shown or value only), and wha
 
 ## Widgets
 
-Every value comes from the JSON Antigravity pipes on stdin. A widget with nothing to show hides itself: a model, quota, reset time, context window or token usage that is missing from the payload (or unusable) is left out, not shown as `Unknown`, `0%` or `now`.
+Most values come from the JSON Antigravity pipes on stdin; `host` and `ram` read from the OS, and token totals across conversations read from agy's local database. A widget with nothing to show hides itself: a model, quota, reset time, context window or token usage that is missing from the payload (or unusable) is left out, not shown as `Unknown`, `0%` or `now`.
 
 - Model (`model.display_name`; `"short": true` shows `3.8 Flash·High` instead of `Gemini 3.8 Flash (High)`)
 - Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; the Argon weekly bucket (`Argon 7d`) for Gemini 4 Argon, the other `gemini-*` buckets for the other Gemini models and for Argon on plans without an Argon bucket, `3p-*` for the others)
@@ -84,6 +84,7 @@ Every value comes from the JSON Antigravity pipes on stdin. A widget with nothin
 - Approval and Vim mode (`mode` e.g. `🧭 accept-edits, NORMAL`: `cycle_mode` and `vim.mode`; an approval mode shows in the caution color; hidden in the default mode with Vim editing off)
 - Conversation title (`title` e.g. `💬 Fix the config loader`: `conversation_title` on one line, cut to 30 columns; hidden until the conversation has a title; among the first widgets dropped when a row doesn't fit)
 - Cache read / create
+- Current user and short host name (`host`, e.g. `🖥️ alex@devbox`): reads the user from OS account info (falling back to `USER` / `USERNAME`) and the hostname up to the first dot
 - RAM usage of your machine (`ram`, read from the OS; caution color from 80%, danger from 90%)
 - Sandbox with network security state (`sandbox (net)` vs `sandbox (isolated)`)
 - Flex Separator (grows to fill `terminal_width`)

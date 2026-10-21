@@ -123,6 +123,13 @@ const WIDGET_CATALOG = [
     summary: "project folder name",
   },
   {
+    id: "host",
+    label: "Host",
+    unique: true,
+    description: "current user and short host name",
+    summary: "current user and host",
+  },
+  {
     id: "git",
     label: "VCS Branch",
     unique: true,

@@ -1,7 +1,7 @@
 "use strict";
 
 const os = require("os");
-const { formatReset, resetInSeconds, firstText } = require("./formatters");
+const { formatReset, resetInSeconds, firstText, stripControl } = require("./formatters");
 const { resolveGit, resolveGitDetails } = require("./git");
 const { resolveUsage } = require("./usage");
 
@@ -181,6 +181,24 @@ function extractSession(data, config, options = {}) {
     // Leave RAM at 0 when the OS won't say.
   }
 
+  let userInfoName = "";
+  try {
+    userInfoName = os.userInfo().username;
+  } catch {
+    // Some containers have no passwd entry for the current user.
+  }
+  const username =
+    [userInfoName, process.env.USER, process.env.USERNAME]
+      .map((name) => stripControl(name).trim())
+      .find(Boolean) || "";
+
+  let hostname = "";
+  try {
+    hostname = stripControl(os.hostname()).split(".")[0].trim();
+  } catch {
+    // The host widget hides when the OS cannot provide a name.
+  }
+
   const usage = data.context_window?.current_usage;
   const inputTokens = count(data.context_window?.total_input_tokens);
   const outputTokens = count(data.context_window?.total_output_tokens);
@@ -196,6 +214,8 @@ function extractSession(data, config, options = {}) {
 
   return {
     ramPct,
+    username,
+    hostname,
     model: modelName,
     contextPct,
     contextSize,

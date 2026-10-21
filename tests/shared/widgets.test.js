@@ -2,6 +2,7 @@
 
 const { LAYOUT_ORDER } = require("../../src/lib/config");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { record } = require("../helpers");
 const { renderStatusline, defaultConfig } = require("../../src/lib/shared");
@@ -30,6 +31,98 @@ async function run() {
   testTasks();
   testMode();
   testTitle();
+  testHost();
+}
+
+function testHost() {
+  const previous = {
+    hostname: os.hostname,
+    userInfo: os.userInfo,
+    user: process.env.USER,
+    username: process.env.USERNAME,
+  };
+  const widgets = [{ id: "host" }];
+  const payload = fixture("antigravity-1.3.0.json");
+  record("host stays opt-in", !defaultConfig().widgets.some((widget) => widget.id === "host"));
+
+  try {
+    os.hostname = () => "devbox.example.test";
+    os.userInfo = () => ({ username: "alex" });
+    delete process.env.USER;
+    delete process.env.USERNAME;
+
+    for (const layout of LAYOUT_ORDER) {
+      const output = render(payload, widgets, { layout });
+      record(
+        `${layout} host shows the user and short hostname`,
+        /alex@devbox/.test(output) && !/example\.test/.test(output),
+        output
+      );
+    }
+
+    os.userInfo = () => {
+      throw new Error("no passwd entry");
+    };
+    process.env.USER = "shell-user";
+    record(
+      "host falls back to USER when userInfo throws",
+      /shell-user@devbox/.test(render(payload, widgets))
+    );
+
+    process.env.USER = "";
+    process.env.USERNAME = "windows-user";
+    record(
+      "host falls back to USERNAME when USER is empty",
+      /windows-user@devbox/.test(render(payload, widgets))
+    );
+
+    delete process.env.USER;
+    delete process.env.USERNAME;
+    const hostOnly = render(payload, widgets);
+    record(
+      "host shows only the hostname when no username is available",
+      /devbox/.test(hostOnly) && !/@/.test(hostOnly)
+    );
+
+    os.hostname = () => {
+      throw new Error("hostname unavailable");
+    };
+    record(
+      "host hides when the OS cannot provide a hostname",
+      render(payload, widgets).trim() === ""
+    );
+
+    os.hostname = () => "devbox.example.test";
+    os.userInfo = () => ({ username: "alex" });
+    const ascii = render(payload, widgets, { ascii: true });
+    record(
+      "host renders without non-ASCII characters in ASCII mode",
+      ascii.includes("Host: alex@devbox") && !/[^\x00-\x7f]/.test(ascii),
+      ascii
+    );
+
+    os.userInfo = () => ({ username: "al\u001b[31mex" });
+    os.hostname = () => "devbox\u0007.example.test";
+    const clean = renderStatusline(payload, { ...defaultConfig(), widgets }, { color: "none" });
+    record(
+      "host strips terminal control characters from OS values",
+      /alex@devbox/.test(clean) && !clean.includes("\u001b[31m") && !clean.includes("\u0007"),
+      JSON.stringify(clean)
+    );
+  } finally {
+    os.hostname = previous.hostname;
+    os.userInfo = previous.userInfo;
+    if (previous.user === undefined) {
+      delete process.env.USER;
+    } else {
+      process.env.USER = previous.user;
+    }
+    if (previous.username === undefined) {
+      delete process.env.USERNAME;
+    } else {
+      process.env.USERNAME = previous.username;
+    }
+  }
 }
 
 function testTitle() {

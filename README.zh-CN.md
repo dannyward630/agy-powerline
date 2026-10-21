@@ -156,6 +156,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | 会话 token 数和提示缓存的使用情况                                                                        |
 | `tokensToday`、`tokensWeek`                                   | 今天和过去 7 天的 token 用量（所有对话，Node 22.13+）                                                    |
 | `ram`                                                         | 本机已用内存                                                                                             |
+| `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                              |
 | `customText`、`exec`                                          | 你自己的文本，或 [shell 命令](docs/configuration.md#shell-command-widget-exec)的输出                     |
 
 没有内容可显示的组件会自动隐藏。组件可以更改颜色、去掉标签，或设置自己的告警阈值：见 [Configuration](docs/configuration.md)。

@@ -10,6 +10,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { record, PAYLOAD } = require("../helpers");
+const { LAYOUT_ORDER } = require("../../src/lib/config");
 const {
   renderStatusline,
   defaultConfig,
@@ -171,8 +172,19 @@ function describe(output) {
 
 function renderSnapshot(name, data) {
   const sections = [`# ${name}`, ""];
+  const snapshotCases = cases();
 
-  for (const [label, config, overrides] of cases()) {
+  if (name === "sample") {
+    for (const layout of LAYOUT_ORDER) {
+      snapshotCases.push([
+        `host widget · ${layout}`,
+        { ...defaultConfig(), layout, widgets: [{ id: "host" }] },
+        { color: "none" },
+      ]);
+    }
+  }
+
+  for (const [label, config, overrides] of snapshotCases) {
     const out = renderStatusline(data, config, { ...overrides, env: {} });
     sections.push(`## ${label}`, describe(out), "");
   }
@@ -180,11 +192,11 @@ function renderSnapshot(name, data) {
   return sections.join("\n");
 }
 
-// Pins the clock, timezone and RAM readings while `fn` runs.
+// Pins the clock, timezone, RAM and host identity while `fn` runs.
 function frozen(fn) {
   const RealDate = Date;
   const previousTz = process.env.TZ;
-  const { freemem, totalmem } = os;
+  const { freemem, totalmem, hostname, userInfo } = os;
 
   class FixedDate extends RealDate {
     constructor(...args) {
@@ -204,6 +216,8 @@ function frozen(fn) {
   process.env.TZ = "UTC";
   os.freemem = () => 6 * GIB;
   os.totalmem = () => 16 * GIB;
+  os.hostname = () => "devbox";
+  os.userInfo = () => ({ username: "alex" });
 
   try {
     return fn();
@@ -216,6 +230,8 @@ function frozen(fn) {
     }
     os.freemem = freemem;
     os.totalmem = totalmem;
+    os.hostname = hostname;
+    os.userInfo = userInfo;
   }
 }
 

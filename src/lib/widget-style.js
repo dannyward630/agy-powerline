@@ -100,6 +100,7 @@ const WIDGET_TAGS = {
   contextTokens: { icon: "💾", name: "Context" },
   cwd: { icon: "📂", name: "Dir" },
   project: { icon: "📦", name: "Project" },
+  host: { icon: "🖥️", name: "Host", iconOnly: true },
   git: { icon: "🌿", name: "" },
   gitChanges: { icon: "📝", name: "Lines" },
   gitFiles: { icon: "📄", name: "Files" },

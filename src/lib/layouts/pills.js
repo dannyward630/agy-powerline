@@ -495,6 +495,14 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       return pill(colors.meta, lbl(name));
     }
 
+    case "host": {
+      if (!session.hostname) {
+        return null;
+      }
+      const name = session.username ? `${session.username}@${session.hostname}` : session.hostname;
+      return pill(colors.meta, lbl(name));
+    }
+
     case "git": {
       // Antigravity can send vcs.type without a branch; an empty pill says nothing.
       if (!session.git?.branch) {

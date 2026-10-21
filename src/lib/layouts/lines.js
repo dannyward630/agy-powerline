@@ -404,6 +404,14 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       return fg(palette.location) + tag() + proj + RESET;
     }
 
+    case "host": {
+      if (!session.hostname) {
+        return null;
+      }
+      const name = session.username ? `${session.username}@${session.hostname}` : session.hostname;
+      return fg(palette.location) + tag() + name + RESET;
+    }
+
     case "git": {
       if (!session.git || !session.git.branch) {
         return null;
