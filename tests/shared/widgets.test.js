@@ -215,12 +215,6 @@ function testWidgetWidthAndDepth() {
       shown: "abcdefg…",
       ascii: "abcde...",
     },
-    {
-      widget: { id: "exec", cmd: "echo hi", maxWidth: 4 },
-      data: {},
-      shown: "[cm…",
-      ascii: "[...",
-    },
   ];
   for (const layout of LAYOUT_ORDER) {
     for (const { widget, data, shown, ascii: asciiShown } of widthWidgets) {
@@ -319,6 +313,38 @@ function testWidgetWidthAndDepth() {
         strip(output)
       );
     }
+  }
+
+  // A memo that already holds the output stands in for running the command.
+  const execWidget = { id: "exec", cmd: "echo hi", maxWidth: 4 };
+  const ranSession = {
+    execMode: "run",
+    execMemo: { has: () => true, get: () => value, set: () => {} },
+    exceeds200k: false,
+  };
+  for (const layout of LAYOUT_ORDER) {
+    const preview = render(fixture("antigravity-1.3.0.json"), [execWidget], { layout });
+    record(`${layout} exec maxWidth leaves the [cmd] preview whole`, preview.includes("[cmd]"));
+    const ran =
+      layout === "pills"
+        ? buildSegment("exec", ranSession, colors, true, false, execWidget, { layout }).text
+        : buildLinesSegment(
+            "exec",
+            ranSession,
+            deriveLinesPalette(colors),
+            true,
+            false,
+            execWidget,
+            {
+              layout,
+              widgets: [execWidget],
+            }
+          );
+    record(
+      `${layout} exec maxWidth clips the command's output`,
+      strip(ran).includes("abc…") && !strip(ran).includes(value),
+      strip(ran)
+    );
   }
 
   const validWidths = [4, 50, 200];

@@ -704,7 +704,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     }
 
     case "exec": {
-      const output = limitWidth(execWidgetOutput(widget, session), widget, ascii);
+      // Only real output is cut: the [cmd] preview and blocked markers stay whole.
+      const output =
+        session.execMode === "run"
+          ? limitWidth(execWidgetOutput(widget, session), widget, ascii)
+          : execWidgetOutput(widget, session);
       if (!output) {
         return null;
       }

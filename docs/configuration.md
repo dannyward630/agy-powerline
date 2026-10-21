@@ -102,8 +102,8 @@ Any widget accepts these options:
 - **`textColor`**: the text color (on the pill in Pills; the plain text parts in Lines).
 - **`bold`**: `false` drops bold in Pills (on by default); `true` makes a Lines widget bold.
 - **`raw`**: `true` shows only the value, without icon or label: `72.0% rem` instead of `⏳ 5h: 72.0% rem`.
-- **`depth`** (`cwd` only): an integer from 1 to 10 keeps the root and last N folders, replacing the middle with `…` (`...` in ASCII mode). `/` and `\` paths are supported; invalid values are ignored.
-- **`maxWidth`**: an integer from 4 to 200 clips only the value, with `…` (`...` in ASCII mode). It applies to `cwd`, `project`, `git` (branch only), `title`, `model`, `customText`, `exec` and `gitWorktree`; invalid values are ignored. On `title`, it replaces the built-in 30-column limit. The icon, label, dirty marker, git operation and ahead/behind counts are not included in the limit.
+- **`depth`** (`cwd` only): an integer from 1 to 10 keeps the root and last N folders, replacing the middle with `…` (`...` in ASCII mode). `/` and `\` paths are supported; invalid values are ignored. `configure` offers 1 to 4; set a higher depth in the config file.
+- **`maxWidth`**: an integer from 4 to 200 clips only the value, with `…` (`...` in ASCII mode). It applies to `cwd`, `project`, `git` (branch only), `title`, `model`, `customText`, `exec` and `gitWorktree`; invalid values are ignored. On `title`, it replaces the built-in 30-column limit. The icon, label, dirty marker, git operation and ahead/behind counts are not included in the limit, and on `exec` the `[cmd]` preview placeholder is never cut. `configure` steps from 10 to 80 columns by 5; set other widths in the config file.
 
 | Option        | Configuration                     | Example                                                                |
 | ------------- | --------------------------------- | ---------------------------------------------------------------------- |
