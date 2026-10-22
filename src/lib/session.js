@@ -31,24 +31,27 @@ const SAMPLE_SESSION_START_MS = Symbol.for("agy-powerline.sampleSessionStartMs")
 
 // Read file metadata only. Conversation database names are IDs and never enter
 // the session object, cache or log.
-function readSessionStartMs(nowMs = Date.now()) {
+async function readSessionStartMs(nowMs = Date.now()) {
   try {
     if (!Number.isFinite(nowMs)) {
       return null;
     }
     const directory = path.join(os.homedir(), ".gemini", "antigravity-cli", "conversations");
-    const entries = fs
-      .readdirSync(directory, { withFileTypes: true })
-      .filter((entry) => entry.isFile() && entry.name.endsWith(".db"));
+    const entries = (await fs.promises.readdir(directory, { withFileTypes: true })).filter(
+      (entry) => entry.isFile() && entry.name.endsWith(".db")
+    );
 
     if (entries.length > MAX_CONVERSATION_FILES) {
       logWarning("SESSION_TOO_MANY_FILES");
       return null;
     }
 
+    const stats = await Promise.all(
+      entries.map((entry) => fs.promises.stat(path.join(directory, entry.name)))
+    );
+
     let newest = null;
-    for (const entry of entries) {
-      const stat = fs.statSync(path.join(directory, entry.name));
+    for (const stat of stats) {
       if (!Number.isFinite(stat.mtimeMs)) {
         return null;
       }
@@ -293,7 +296,7 @@ function extractSession(data, config, options = {}) {
   let sessionStartMs = null;
   if (uses("sessionTime")) {
     if (options.readUsage === true) {
-      sessionStartMs = readSessionStartMs();
+      sessionStartMs = Number.isFinite(options.sessionStartMs) ? options.sessionStartMs : null;
     } else if (Number.isFinite(data?.[SAMPLE_SESSION_START_MS])) {
       sessionStartMs = data[SAMPLE_SESSION_START_MS];
     }

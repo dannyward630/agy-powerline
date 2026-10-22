@@ -4,16 +4,21 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { record, stripAnsi } = require("../helpers");
-const { defaultConfig, renderStatusline, sampleData } = require("../../src/lib/shared");
+const {
+  defaultConfig,
+  renderStatusline,
+  renderStatuslineAsync,
+  sampleData,
+} = require("../../src/lib/shared");
 const { formatSessionTime } = require("../../src/lib/formatters");
-const { extractSession, readSessionStartMs } = require("../../src/lib/session");
+const { readSessionStartMs } = require("../../src/lib/session");
 const { clearLog, getLogPath, readLog, setLogDir } = require("../../src/lib/log");
 
 const MINUTE = 60 * 1000;
 const IDLE = 30 * MINUTE;
 const NOW = Date.parse("2026-10-21T12:00:00.000Z");
 
-function inHome(name, fn, { conversations = true } = {}) {
+async function inHome(name, fn, { conversations = true } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), `agy-session-time-${name}-`));
   const home = path.join(root, "home");
   const installDir = path.join(home, ".agy-powerline");
@@ -35,7 +40,7 @@ function inHome(name, fn, { conversations = true } = {}) {
   setLogDir(installDir);
 
   try {
-    return fn({ home, installDir, conversationsDir });
+    return await fn({ home, installDir, conversationsDir });
   } finally {
     clearLog(installDir);
     setLogDir(previousLogPath ? path.dirname(previousLogPath) : null);
@@ -50,26 +55,26 @@ function inHome(name, fn, { conversations = true } = {}) {
   }
 }
 
-function withClock(now, fn) {
+async function withClock(now, fn) {
   const realNow = Date.now;
   Date.now = () => now;
   try {
-    return fn();
+    return await fn();
   } finally {
     Date.now = realNow;
   }
 }
 
-function withStats(times, fn) {
-  const realStat = fs.statSync;
-  fs.statSync = function (file, ...args) {
+async function withStats(times, fn) {
+  const realStat = fs.promises.stat;
+  fs.promises.stat = async function (file, ...args) {
     const result = times.get(path.resolve(file));
-    return result ? { ...result } : realStat.call(fs, file, ...args);
+    return result ? { ...result } : realStat.call(fs.promises, file, ...args);
   };
   try {
-    return fn();
+    return await fn();
   } finally {
-    fs.statSync = realStat;
+    fs.promises.stat = realStat;
   }
 }
 
@@ -82,12 +87,12 @@ function makeDb(directory, name, mtimeMs = NOW) {
 
 async function run() {
   testFormatting();
-  testReadGate();
-  testNewestConversationAndLayouts();
-  testIdleAndInvalidTimes();
-  testMissingFolder();
-  testTooManyFiles();
-  test2000FileBenchmark();
+  await testReadGate();
+  await testNewestConversationAndLayouts();
+  await testIdleAndInvalidTimes();
+  await testMissingFolder();
+  await testTooManyFiles();
+  await test2000FileBenchmark();
 }
 
 function testFormatting() {
@@ -111,37 +116,41 @@ function testFormatting() {
   record("sessionTime hides invalid start times", formatSessionTime("not-a-time", NOW) === "");
 }
 
-function testReadGate() {
-  inHome("read-gate", ({ conversationsDir }) => {
+async function testReadGate() {
+  await inHome("read-gate", async ({ conversationsDir }) => {
     makeDb(conversationsDir, "test-id.db");
-    const originalReadDir = fs.readdirSync;
+    const originalReadDir = fs.promises.readdir;
     let conversationReads = 0;
-    fs.readdirSync = function (directory, ...args) {
+    fs.promises.readdir = async function (directory, ...args) {
       if (path.resolve(directory) === path.resolve(conversationsDir)) {
         conversationReads += 1;
       }
-      return originalReadDir.call(fs, directory, ...args);
+      return originalReadDir.call(fs.promises, directory, ...args);
     };
     try {
-      extractSession(sampleData(), { widgets: [{ id: "model" }] }, { readUsage: true });
-      extractSession(sampleData(), { widgets: [{ id: "sessionTime" }] });
+      await renderStatuslineAsync(sampleData(), { widgets: [{ id: "model" }] }, { usage: "read" });
+      await renderStatuslineAsync(sampleData(), { widgets: [{ id: "sessionTime" }] });
       record(
-        "sessionTime reads metadata only when enabled on the live statusline",
+        "sessionTime skips metadata reads unless enabled on the live statusline",
         conversationReads === 0
       );
-      extractSession(sampleData(), { widgets: [{ id: "sessionTime" }] }, { readUsage: true });
+      await renderStatuslineAsync(
+        sampleData(),
+        { widgets: [{ id: "sessionTime" }] },
+        { usage: "read" }
+      );
       record(
         "sessionTime reads metadata when enabled on the live statusline",
         conversationReads === 1
       );
     } finally {
-      fs.readdirSync = originalReadDir;
+      fs.promises.readdir = originalReadDir;
     }
   });
 }
 
-function testNewestConversationAndLayouts() {
-  inHome("newest", ({ conversationsDir }) => {
+async function testNewestConversationAndLayouts() {
+  await inHome("newest", async ({ conversationsDir }) => {
     const older = makeDb(conversationsDir, "older-id.db", NOW - 10 * MINUTE);
     const active = makeDb(conversationsDir, "active-id.db", NOW - MINUTE);
     fs.writeFileSync(path.join(conversationsDir, "notes.txt"), "ignored");
@@ -151,9 +160,9 @@ function testNewestConversationAndLayouts() {
       [path.resolve(active), { mtimeMs: NOW - MINUTE, birthtimeMs: NOW - 25 * MINUTE }],
     ]);
 
-    withClock(NOW, () =>
-      withStats(times, () => {
-        const start = readSessionStartMs();
+    await withClock(NOW, () =>
+      withStats(times, async () => {
+        const start = await readSessionStartMs();
         record(
           "sessionTime uses the most recently modified conversation",
           start === NOW - 25 * MINUTE
@@ -173,7 +182,7 @@ function testNewestConversationAndLayouts() {
 
         for (const layout of ["pills", "lines"]) {
           const output = stripAnsi(
-            renderStatusline(
+            await renderStatuslineAsync(
               sampleData(),
               { ...defaultConfig(), layout, widgets: [{ id: "sessionTime" }] },
               { color: "none", usage: "read" }
@@ -188,7 +197,7 @@ function testNewestConversationAndLayouts() {
           );
 
           const raw = stripAnsi(
-            renderStatusline(
+            await renderStatuslineAsync(
               sampleData(),
               { ...defaultConfig(), layout, widgets: [{ id: "sessionTime", raw: true }] },
               { color: "none", usage: "read" }
@@ -205,15 +214,15 @@ function testNewestConversationAndLayouts() {
   });
 }
 
-function testIdleAndInvalidTimes() {
-  inHome("invalid-times", ({ conversationsDir }) => {
+async function testIdleAndInvalidTimes() {
+  await inHome("invalid-times", async ({ conversationsDir }) => {
     const file = makeDb(conversationsDir, "fixture-id.db", NOW - IDLE - 1);
     const oldFileTimes = new Map([
       [path.resolve(file), { mtimeMs: NOW - IDLE - 1, birthtimeMs: NOW - 60 * MINUTE }],
     ]);
     record(
       "sessionTime hides a conversation idle for more than 30 minutes",
-      withStats(oldFileTimes, () => readSessionStartMs(NOW)) === null
+      (await withStats(oldFileTimes, () => readSessionStartMs(NOW))) === null
     );
 
     const mtimeMs = NOW - MINUTE;
@@ -222,7 +231,7 @@ function testIdleAndInvalidTimes() {
       const times = new Map([[path.resolve(file), { mtimeMs, birthtimeMs }]]);
       record(
         "sessionTime hides an invalid conversation creation time",
-        withStats(times, () => readSessionStartMs(NOW)) === null
+        (await withStats(times, () => readSessionStartMs(NOW))) === null
       );
     }
 
@@ -233,47 +242,47 @@ function testIdleAndInvalidTimes() {
     ]);
     record(
       "sessionTime ignores an invalid creation time on an older conversation",
-      withStats(oldAndActiveTimes, () => readSessionStartMs(NOW)) === NOW - 25 * MINUTE
+      (await withStats(oldAndActiveTimes, () => readSessionStartMs(NOW))) === NOW - 25 * MINUTE
     );
   });
 }
 
-function testMissingFolder() {
-  inHome(
+async function testMissingFolder() {
+  await inHome(
     "missing-folder",
-    () => {
+    async () => {
       record(
         "sessionTime hides when the conversations folder is missing",
-        readSessionStartMs(NOW) === null
+        (await readSessionStartMs(NOW)) === null
       );
     },
     { conversations: false }
   );
 }
 
-function testTooManyFiles() {
-  inHome("too-many", ({ conversationsDir, installDir }) => {
-    const realReadDir = fs.readdirSync;
-    const realStat = fs.statSync;
+async function testTooManyFiles() {
+  await inHome("too-many", async ({ conversationsDir, installDir }) => {
+    const realReadDir = fs.promises.readdir;
+    const realStat = fs.promises.stat;
     let conversationStats = 0;
-    fs.readdirSync = function (directory, ...args) {
+    fs.promises.readdir = async function (directory, ...args) {
       if (path.resolve(directory) === path.resolve(conversationsDir)) {
         return Array.from({ length: 2001 }, (_, index) => ({
           name: `conversation-${index}.db`,
           isFile: () => true,
         }));
       }
-      return realReadDir.call(fs, directory, ...args);
+      return realReadDir.call(fs.promises, directory, ...args);
     };
-    fs.statSync = function (file, ...args) {
+    fs.promises.stat = async function (file, ...args) {
       if (path.dirname(path.resolve(file)) === path.resolve(conversationsDir)) {
         conversationStats += 1;
       }
-      return realStat.call(fs, file, ...args);
+      return realStat.call(fs.promises, file, ...args);
     };
 
     try {
-      const result = readSessionStartMs(NOW);
+      const result = await readSessionStartMs(NOW);
       const entries = readLog(getLogPath(installDir));
       const logText = JSON.stringify(entries);
       record(
@@ -287,14 +296,14 @@ function testTooManyFiles() {
           !logText.includes("conversation-2000.db")
       );
     } finally {
-      fs.readdirSync = realReadDir;
-      fs.statSync = realStat;
+      fs.promises.readdir = realReadDir;
+      fs.promises.stat = realStat;
     }
   });
 }
 
-function test2000FileBenchmark() {
-  inHome("benchmark", ({ conversationsDir }) => {
+async function test2000FileBenchmark() {
+  await inHome("benchmark", async ({ conversationsDir }) => {
     for (let index = 0; index < 2000; index += 1) {
       fs.writeFileSync(path.join(conversationsDir, `benchmark-${index}.db`), "");
     }
@@ -302,7 +311,7 @@ function test2000FileBenchmark() {
     const samples = [];
     for (let sample = 0; sample < 3; sample += 1) {
       const start = process.hrtime.bigint();
-      readSessionStartMs();
+      await readSessionStartMs();
       samples.push(Number(process.hrtime.bigint() - start) / 1e6);
     }
     samples.sort((a, b) => a - b);
