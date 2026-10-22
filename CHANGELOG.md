@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Per-render `preset`, `layout`, `theme`, `caps` and `gradient` overrides for CLI previews and the installed statusline (#100)
+- The README in Spanish (README.es.md) (#52)
 
 ## [1.5.0] - 2026-10-21
 
