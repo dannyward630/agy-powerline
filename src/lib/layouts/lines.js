@@ -33,6 +33,7 @@ const {
   shortModelName,
   formatTokenSplit,
   formatUsage,
+  formatSessionTime,
   resolveQuotaThresholds,
   resolveContextThresholds,
   shouldBlink,
@@ -540,6 +541,11 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         return null;
       }
       return fg(palette.text) + tag() + limitWidth(session.title, widget, ascii, TITLE_MAX) + RESET;
+
+    case "sessionTime": {
+      const text = formatSessionTime(session.sessionStartMs);
+      return text ? fg(palette.text) + tag() + text + RESET : "";
+    }
 
     case "sandbox": {
       if (!session.sandbox) {

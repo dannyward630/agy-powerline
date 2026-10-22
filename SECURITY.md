@@ -40,9 +40,10 @@ The CLI itself (`npx agy-powerline ...`) additionally:
 
 ## Files it reads
 
-Besides its own config, the session JSON and the `.git` folder of your project, the statusline reads one more thing, and only with the `tokensToday` or `tokensWeek` widget on the bar:
+Besides its own config, the session JSON and the `.git` folder of your project, the statusline inspects agy's conversations folder only with the `tokensToday`, `tokensWeek` or `sessionTime` widget on the bar:
 
-- `~/.gemini/antigravity-cli/conversations/*.db`, agy's conversation databases, opened read-only. Only these fields are read: the token counts (input, output), the response, provider message and message IDs (to count a response once) and timestamps. Never a message, prompt, title, model name or file name. Nothing from them is printed, logged or cached except the token totals per day. Previews never open them.
+- `~/.gemini/antigravity-cli/conversations/*.db`, agy's conversation databases, opened read-only by the token widgets. Only the token counts (input, output), response/provider message IDs (to count a response once) and timestamps are read. No message, prompt, title or model name is read. Nothing from database contents is printed, logged or cached except daily token totals. Previews do not open databases.
+- With `sessionTime`, the conversations folder is listed and each `.db` file's creation and modification times are read; the widget never reads database contents or outputs, logs or caches file names.
 
 ## Files it writes
 
@@ -68,7 +69,7 @@ On macOS and Linux, `statusline.config.json`, its `.bak`, `.exec-cache.json`, `.
 
 ## Your email and session IDs
 
-Antigravity includes your account email and session and conversation IDs in the JSON it sends. agy-powerline never reads them: no widget shows them, neither the debug dump nor the problem log writes them, and they are removed from the session JSON before an `exec` widget with `"payload": true` gets it.
+Antigravity includes your account email and session and conversation IDs in the JSON it sends. agy-powerline never reads those payload fields: no widget shows them, neither the debug dump nor the problem log writes them, and they are removed from the session JSON before an `exec` widget with `"payload": true` gets it. The `sessionTime` widget uses conversation filenames only to stat files and never compares, prints, logs or caches them.
 
 ## The problem log
 

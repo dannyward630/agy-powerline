@@ -1,10 +1,13 @@
 "use strict";
 
+const fs = require("fs");
 const os = require("os");
+const path = require("path");
 const { formatReset, resetInSeconds, firstText, stripControl } = require("./formatters");
 const { resolveGit, resolveGitDetails } = require("./git");
 const { resolveUsage } = require("./usage");
 const { isWsl } = require("./paths");
+const { logWarning } = require("./log");
 
 const FIVE_HOURS = 5 * 3600;
 const SEVEN_DAYS = 7 * 86400;
@@ -22,6 +25,56 @@ const QUOTA_BUCKETS = {
 };
 // No quota window lasts a year: a reset further out is a broken value.
 const MAX_RESET_SECONDS = 366 * 86400;
+const MAX_CONVERSATION_FILES = 2000;
+const SESSION_IDLE_MS = 30 * 60 * 1000;
+const SAMPLE_SESSION_START_MS = Symbol.for("agy-powerline.sampleSessionStartMs");
+
+// Read file metadata only. Conversation database names are IDs and never enter
+// the session object, cache or log.
+function readSessionStartMs(nowMs = Date.now()) {
+  try {
+    if (!Number.isFinite(nowMs)) {
+      return null;
+    }
+    const directory = path.join(os.homedir(), ".gemini", "antigravity-cli", "conversations");
+    const entries = fs
+      .readdirSync(directory, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".db"));
+
+    if (entries.length > MAX_CONVERSATION_FILES) {
+      logWarning("SESSION_TOO_MANY_FILES");
+      return null;
+    }
+
+    let newest = null;
+    for (const entry of entries) {
+      const stat = fs.statSync(path.join(directory, entry.name));
+      if (!Number.isFinite(stat.mtimeMs)) {
+        return null;
+      }
+      if (!newest || stat.mtimeMs > newest.mtimeMs) {
+        newest = { mtimeMs: stat.mtimeMs, birthtimeMs: stat.birthtimeMs };
+      }
+    }
+
+    if (
+      !newest ||
+      !Number.isFinite(newest.birthtimeMs) ||
+      nowMs - newest.mtimeMs > SESSION_IDLE_MS
+    ) {
+      return null;
+    }
+
+    const startMs = newest.birthtimeMs;
+    if (startMs <= 0 || startMs > newest.mtimeMs || startMs > nowMs) {
+      return null;
+    }
+    return startMs;
+  } catch {
+    // A missing or unreadable conversations folder only hides this widget.
+    return null;
+  }
+}
 
 // Node's platform ids, spelled the way people write them.
 const OS_NAMES = {
@@ -186,8 +239,8 @@ function contextUsedPercent(data) {
   return (current * 100) / size;
 }
 
-// options.readUsage: the statusline itself may read agy's conversation
-// databases; previews only use the usage cache.
+// options.readUsage: the live statusline may read conversation metadata and
+// databases; previews use the usage cache and a synthetic sample start time.
 function extractSession(data, config, options = {}) {
   const git = resolveGit(data, config);
   const gitDetails = resolveGitDetails(data, config);
@@ -237,6 +290,14 @@ function extractSession(data, config, options = {}) {
   const uses = (id) => Boolean(config?.widgets?.some((widget) => widget?.id === id));
   const osName = uses("os") ? currentOsName() : "";
   const { username, hostname } = uses("host") ? currentUserAndHost() : {};
+  let sessionStartMs = null;
+  if (uses("sessionTime")) {
+    if (options.readUsage === true) {
+      sessionStartMs = readSessionStartMs();
+    } else if (Number.isFinite(data?.[SAMPLE_SESSION_START_MS])) {
+      sessionStartMs = data[SAMPLE_SESSION_START_MS];
+    }
+  }
 
   return {
     os: osName,
@@ -279,6 +340,7 @@ function extractSession(data, config, options = {}) {
     vimMode: firstText(data.vim?.mode),
     // Left out until the conversation has a title; kept to one line.
     title: firstText(data.conversation_title).replace(/\s+/g, " ").trim(),
+    sessionStartMs,
     version: firstText(data.version),
     sandbox: data.sandbox?.enabled === true,
     sandboxNet: data.sandbox?.allow_network === true,
@@ -302,5 +364,6 @@ module.exports = {
   tightestQuota,
   contextUsedPercent,
   currentUserAndHost,
+  readSessionStartMs,
   extractSession,
 };

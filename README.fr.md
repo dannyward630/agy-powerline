@@ -155,6 +155,7 @@ Prévisualisez tous les thèmes avec `npx agy-powerline theme --gallery`.
 | `tasks`                                                       | Sous-agents actifs et tâches en arrière-plan                                                                         |
 | `mode`                                                        | Mode d’approbation (par exemple `accept-edits`) et mode Vim                                                          |
 | `title`                                                       | Titre de la conversation                                                                                             |
+| `sessionTime`                                                 | Time since the active conversation started                                                                           |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Tokens de la session et utilisation du cache des prompts                                                             |
 | `tokensToday`, `tokensWeek`                                   | Tokens utilisés aujourd’hui et sur les 7 derniers jours, toutes conversations confondues (Node 22.13+)               |
 | `ram`                                                         | Mémoire utilisée sur votre machine                                                                                   |

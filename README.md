@@ -166,6 +166,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/) or with `npx
 | `tasks`                                                       | Running subagents and background tasks                                                                   |
 | `mode`                                                        | Approval mode (e.g. accept-edits) and Vim mode                                                           |
 | `title`                                                       | The conversation's title                                                                                 |
+| `sessionTime`                                                 | Time since the active conversation started                                                               |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Session tokens and prompt cache usage                                                                    |
 | `tokensToday`, `tokensWeek`                                   | Tokens used today and over the last 7 days, all conversations (Node 22.13+)                              |
 | `ram`                                                         | Memory used on your machine                                                                              |
