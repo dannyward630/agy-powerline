@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `sessionTime` shows how long the active conversation has been running (#96)
+- The README in Spanish (README.es.md) (#52)
 
 ## [1.5.0] - 2026-10-21
 
