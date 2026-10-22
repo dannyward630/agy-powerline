@@ -53,7 +53,7 @@ const {
   sanitizeDeep,
 } = require("./formatters");
 
-const { extractSession, readSessionStartMs } = require("./session");
+const { extractSession } = require("./session");
 const { execPayloadJson } = require("./exec");
 const { fitWidgets, truncateLines, widestLine } = require("./fit");
 
@@ -83,18 +83,6 @@ function renderStatusline(data, config, overrides = {}) {
   return overrides.configError ? `${configWarning(overrides)}\n${out}` : out;
 }
 
-async function renderStatuslineAsync(data, config, overrides = {}) {
-  const resolved = mergeConfig(config);
-  if (
-    overrides.usage === "read" &&
-    resolved.widgets.some((widget) => widget.id === "sessionTime")
-  ) {
-    const sessionStartMs = await readSessionStartMs();
-    return renderStatusline(data, resolved, { ...overrides, sessionStartMs });
-  }
-  return renderStatusline(data, resolved, overrides);
-}
-
 function renderBar(data, config, overrides) {
   const resolved = mergeConfig(config);
   const env = overrides.env || process.env;
@@ -106,10 +94,7 @@ function renderBar(data, config, overrides) {
   // Valid JSON can still be null, a number or an array; read those as empty.
   const payload = data && typeof data === "object" && !Array.isArray(data) ? data : {};
   const session = sanitizeDeep(
-    extractSession(payload, resolved, {
-      readUsage: overrides.usage === "read",
-      sessionStartMs: overrides.sessionStartMs,
-    })
+    extractSession(payload, resolved, { readUsage: overrides.usage === "read" })
   );
   // Exec widgets only run when the caller opts in ("run"); CLI previews keep
   // the default placeholder so rendering a config never executes it.
@@ -211,7 +196,6 @@ module.exports = {
 
   // Rendering
   renderStatusline,
-  renderStatuslineAsync,
   deriveLinesPalette,
   colorForRemainingPct,
   renderDotMeter,

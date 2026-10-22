@@ -2,7 +2,7 @@
 "use strict";
 
 const path = require("path");
-const { readConfigFile, renderStatuslineAsync } = require("./shared");
+const { readConfigFile, renderStatusline } = require("./shared");
 const { isTrustedInstallDir } = require("./paths");
 const { dumpTarget, writePayloadDump } = require("./payload-dump");
 const {
@@ -71,17 +71,11 @@ function readStdin(timeoutMs) {
   });
 }
 
-readStdin(STDIN_TIMEOUT_MS)
-  .then(({ text, complete }) => {
-    return render(text.replace(/^\uFEFF/, "").trim(), complete);
-  })
-  .catch((err) => {
-    logError("RUNTIME_CRASH", err);
-    process.stderr.write(`[agy-powerline] ${redact(err?.message || err)}\n`);
-    process.stdout.write("\x1b[31m[agy-powerline: error, see agy-powerline.log]\x1b[0m\n");
-  });
+readStdin(STDIN_TIMEOUT_MS).then(({ text, complete }) => {
+  render(text.replace(/^\uFEFF/, "").trim(), complete);
+});
 
-async function render(input, complete) {
+function render(input, complete) {
   if (!input) {
     if (!complete) {
       logWarning("STDIN_TIMEOUT", { ms: STDIN_TIMEOUT_MS });
@@ -132,7 +126,7 @@ async function render(input, complete) {
   }
 
   const started = Date.now();
-  const output = await renderStatuslineAsync(data, config, { exec, configError, usage: "read" });
+  const output = renderStatusline(data, config, { exec, configError, usage: "read" });
   const elapsed = Date.now() - started;
 
   if (elapsed > SLOW_RENDER_MS) {
