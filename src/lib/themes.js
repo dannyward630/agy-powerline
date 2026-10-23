@@ -9,7 +9,7 @@ const { parseColor, parseGradientStops, luminance } = require("./colors");
 //                 protanopia, deuteranopia and tritanopia
 // Most dark-* and light-* colors come from VS Code's default themes (Dark+
 // and Light+ syntax, git decorations, warning/error and terminal colors);
-// nocturne, onyx, metro, macchiato, nord, rose-pine and cream take their palettes from
+// nocturne, onyx, metro, macchiato, nord, rose-pine, cream and tokyo-night take their palettes from
 // community themes (credited below). A few colors are adjusted where the
 // checks below need it: darkened or lightened for contrast, and gitDirty
 // moved toward orange so a dirty branch never looks like the caution state.
@@ -285,25 +285,20 @@ const THEMES = {
   }),
 
   // Palette from Tokyo Night Light (tokyo-night/tokyo-night-vscode-theme, MIT).
-  "light-tokyo-night": theme(
-    "light",
-    "Tokyo Night Light",
-    "Tokyo Night Light colors, tuned for contrast",
-    {
-      text: LIGHT_TEXT,
-      track: "#c8c8c8",
-      model: "#5a3e8e",
-      fiveHour: "#385f0d",
-      weekly: "#0f4b6e",
-      thirdParty: "#965027",
-      context: "#2959aa",
-      git: "#33635c",
-      gitDirty: "#8a3c25",
-      meta: "#6c6e75",
-      caution: "#8f5e15",
-      warn: "#7b2840",
-    }
-  ),
+  "light-tokyo-night": theme("light", "Light Tokyo Night", "Ink blue, violet and moss green", {
+    text: LIGHT_TEXT,
+    track: "#c8c8c8",
+    model: "#5a3e8e",
+    fiveHour: "#385f0d",
+    weekly: "#0f4b6e",
+    thirdParty: "#965027",
+    context: "#2959aa",
+    git: "#33635c",
+    gitDirty: "#8a3c25",
+    meta: "#6c6e75",
+    caution: "#8f5e15",
+    warn: "#7b2840",
+  }),
 
   "colorblind-dark": theme(
     "colorblind",
