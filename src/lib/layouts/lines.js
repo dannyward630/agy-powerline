@@ -544,7 +544,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
 
     case "sessionTime": {
       const text = formatSessionTime(session.sessionStartMs);
-      return text ? fg(palette.text) + tag() + text + RESET : "";
+      return text ? fg(palette.text) + tag() + text + RESET : null;
     }
 
     case "sandbox": {

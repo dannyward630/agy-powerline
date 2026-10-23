@@ -5,8 +5,8 @@ const os = require("os");
 const path = require("path");
 const { formatReset, resetInSeconds, firstText, stripControl } = require("./formatters");
 const { resolveGit, resolveGitDetails } = require("./git");
-const { resolveUsage } = require("./usage");
-const { isWsl } = require("./paths");
+const { resolveUsage, conversationsDir } = require("./usage");
+const { isWsl, resolveInstallDir, writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 const { logWarning } = require("./log");
 
 const FIVE_HOURS = 5 * 3600;
@@ -33,7 +33,6 @@ const SAMPLE_SESSION_START_MS = Symbol.for("agy-powerline.sampleSessionStartMs")
 
 function sessionCachePath() {
   try {
-    const { resolveInstallDir } = require("./paths");
     const dir = resolveInstallDir();
     return dir && fs.existsSync(path.join(dir, "statusline.config.json"))
       ? path.join(dir, SESSION_CACHE_NAME)
@@ -49,8 +48,8 @@ function readSessionCache(file) {
     if (
       data &&
       typeof data === "object" &&
-      Number.isFinite(data.startMs) &&
-      Number.isFinite(data.newestMtimeMs) &&
+      (data.startMs === null || Number.isFinite(data.startMs)) &&
+      (data.newestMtimeMs === null || Number.isFinite(data.newestMtimeMs)) &&
       Number.isFinite(data.scannedAt)
     ) {
       return data;
@@ -63,11 +62,54 @@ function readSessionCache(file) {
 
 function writeSessionCache(file, cache) {
   try {
-    const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
     writeFileAtomic(file, JSON.stringify(cache), { mode: PRIVATE_FILE_MODE });
   } catch {
     // Write failure is non-fatal.
   }
+}
+
+// A scan's result, kept for SESSION_CACHE_TTL_MS. startMs is null when the
+// scan found nothing to show, so an idle or unusable folder isn't rescanned on
+// every refresh either.
+function scanSessionStart(nowMs) {
+  const directory = conversationsDir();
+  const listing = fs.readdirSync(directory, { withFileTypes: true });
+  const entries = listing.filter((entry) => entry.isFile() && entry.name.endsWith(".db"));
+  // Only stat the -wal files the listing has: a failed stat costs as much as a
+  // real one, and most databases have none.
+  const wals = new Set(listing.filter((e) => e.name.endsWith(".db-wal")).map((e) => e.name));
+
+  if (entries.length > MAX_CONVERSATION_FILES) {
+    logWarning("SESSION_TOO_MANY_FILES");
+    return { startMs: null, newestMtimeMs: null };
+  }
+
+  let newest = null;
+  for (const entry of entries) {
+    const dbPath = path.join(directory, entry.name);
+    const stat = fs.statSync(dbPath);
+    let mtimeMs = stat.mtimeMs;
+    // agy writes to the -wal file first, like signature() in usage.js.
+    if (wals.has(`${entry.name}-wal`)) {
+      try {
+        mtimeMs = Math.max(mtimeMs, fs.statSync(`${dbPath}-wal`).mtimeMs);
+      } catch {
+        // Removed since the listing.
+      }
+    }
+    if (Number.isFinite(mtimeMs) && (!newest || mtimeMs > newest.mtimeMs)) {
+      newest = { mtimeMs, birthtimeMs: stat.birthtimeMs };
+    }
+  }
+
+  if (!newest) {
+    return { startMs: null, newestMtimeMs: null };
+  }
+  const startMs = newest.birthtimeMs;
+  // Some Linux filesystems report no creation time: hide rather than guess.
+  const valid =
+    Number.isFinite(startMs) && startMs > 0 && startMs <= newest.mtimeMs && startMs <= nowMs;
+  return { startMs: valid ? startMs : null, newestMtimeMs: newest.mtimeMs };
 }
 
 // Read file metadata only. Conversation database names are IDs and never enter
@@ -78,67 +120,17 @@ function readSessionStartMs(nowMs = Date.now()) {
       return null;
     }
     const cacheFile = sessionCachePath();
-    if (cacheFile) {
-      const cached = readSessionCache(cacheFile);
-      if (cached && nowMs - cached.scannedAt < SESSION_CACHE_TTL_MS) {
-        if (nowMs - cached.newestMtimeMs > SESSION_IDLE_MS) {
-          return null;
-        }
-        return cached.startMs;
+    let result = cacheFile ? readSessionCache(cacheFile) : null;
+    if (!result || nowMs - result.scannedAt >= SESSION_CACHE_TTL_MS || result.scannedAt > nowMs) {
+      result = { ...scanSessionStart(nowMs), scannedAt: nowMs };
+      if (cacheFile) {
+        writeSessionCache(cacheFile, result);
       }
     }
-
-    const directory = path.join(os.homedir(), ".gemini", "antigravity-cli", "conversations");
-    const entries = fs
-      .readdirSync(directory, { withFileTypes: true })
-      .filter((entry) => entry.isFile() && entry.name.endsWith(".db"));
-
-    if (entries.length > MAX_CONVERSATION_FILES) {
-      logWarning("SESSION_TOO_MANY_FILES");
+    if (result.startMs === null || nowMs - result.newestMtimeMs > SESSION_IDLE_MS) {
       return null;
     }
-
-    let newest = null;
-    for (const entry of entries) {
-      const dbPath = path.join(directory, entry.name);
-      const stat = fs.statSync(dbPath);
-      if (!Number.isFinite(stat.mtimeMs)) {
-        return null;
-      }
-      let mtimeMs = stat.mtimeMs;
-      try {
-        const wal = fs.statSync(`${dbPath}-wal`);
-        if (Number.isFinite(wal.mtimeMs)) {
-          mtimeMs = Math.max(mtimeMs, wal.mtimeMs);
-        }
-      } catch {
-        // No write-ahead log.
-      }
-      if (!newest || mtimeMs > newest.mtimeMs) {
-        newest = { mtimeMs, birthtimeMs: stat.birthtimeMs };
-      }
-    }
-
-    if (
-      !newest ||
-      !Number.isFinite(newest.birthtimeMs) ||
-      nowMs - newest.mtimeMs > SESSION_IDLE_MS
-    ) {
-      return null;
-    }
-
-    const startMs = newest.birthtimeMs;
-    if (startMs <= 0 || startMs > newest.mtimeMs || startMs > nowMs) {
-      return null;
-    }
-    if (cacheFile) {
-      writeSessionCache(cacheFile, {
-        startMs,
-        newestMtimeMs: newest.mtimeMs,
-        scannedAt: nowMs,
-      });
-    }
-    return startMs;
+    return result.startMs;
   } catch {
     // A missing or unreadable conversations folder only hides this widget.
     return null;

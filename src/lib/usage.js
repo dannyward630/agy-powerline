@@ -519,6 +519,7 @@ module.exports = {
   decodeMessage,
   dayKey,
   recentDays,
+  conversationsDir,
   resolveUsage,
   clearUsageCache,
 };
