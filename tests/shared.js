@@ -25,6 +25,7 @@ registerSuite("cli", "./shared/cli.test");
 registerSuite("readme", "./shared/readme.test");
 registerSuite("gallery", "./shared/gallery.test");
 registerSuite("configurator", "./shared/configurator.test");
+registerSuite("site", "./shared/site.test");
 registerSuite("plugin", "./shared/plugin.test");
 registerSuite("robustness", "./shared/robustness.test");
 registerSuite("security", "./shared/security.test");

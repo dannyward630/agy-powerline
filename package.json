@@ -38,6 +38,8 @@
     "gallery": "node scripts/gallery/build.js",
     "screenshots": "node scripts/gallery/screenshots.js",
     "configurator": "node scripts/configurator/build.js",
+    "site": "node scripts/site/build.js",
+    "site:images": "node scripts/site/images.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

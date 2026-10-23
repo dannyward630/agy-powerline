@@ -4,6 +4,14 @@ Everything about `statusline.config.json`, the file `npx agy-powerline configure
 
 Most people never edit it by hand: `configure` covers widgets, order, presets, themes, layout and powerline glyphs. You can also [build your bar in the browser](https://agy-powerline.com/configure/) with live previews, then download or import it. This page is for everything else.
 
+Editors that read JSON Schema, such as VS Code and JetBrains IDEs, complete setting names, widget ids and theme ids and flag typos when the file starts with this line:
+
+```json
+"$schema": "https://agy-powerline.com/schema/v1.json",
+```
+
+`init` writes it in a new config, and `export` and the browser configurator put it in the files they write. The bar ignores it; add it by hand to a config made before.
+
 - [Configurator keys](#configurator-keys)
 - [Widgets](#widgets)
 - [Widget options: colors, labels, minimalist mode](#widget-options)

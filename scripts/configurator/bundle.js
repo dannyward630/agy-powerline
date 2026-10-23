@@ -349,6 +349,7 @@ const AgyConfigurator = {
   sampleData: shared.sampleData,
   defaultConfig: shared.defaultConfig,
   mergeConfig: shared.mergeConfig,
+  CONFIG_SCHEMA_URL: config.CONFIG_SCHEMA_URL,
   THEMES: themes.THEMES,
   THEME_ORDER: themes.THEME_ORDER,
   THEME_KINDS: themes.THEME_KINDS,

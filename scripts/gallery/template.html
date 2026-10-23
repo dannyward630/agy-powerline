@@ -1,13 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{lang}}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- Nothing loads from other sites: the page is its own inline style and script. -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"
-    />
+    <!--SITE_CSP-->
     <!--SITE_HEAD-->
     <style>
       /* SITE_CSS */
@@ -120,15 +117,11 @@
         color: var(--muted);
         font-size: 0.85rem;
       }
-      .hero-facts li {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
       .hero-facts li::before {
         content: "•";
         color: var(--accent);
         font-weight: 700;
+        margin-right: 6px;
       }
       .hero-facts strong {
         color: var(--fg);
@@ -191,8 +184,6 @@
         gap: 14px;
         min-width: 0;
         scroll-margin-top: 136px;
-        content-visibility: auto;
-        contain-intrinsic-size: auto 320px;
       }
       .theme[hidden] {
         display: none;
@@ -209,7 +200,7 @@
         gap: 10px;
         flex-wrap: wrap;
       }
-      .theme-name h2 {
+      .theme-name h3 {
         margin: 0;
         font-size: 1.15rem;
         font-weight: 600;
@@ -311,6 +302,117 @@
         max-width: 75ch;
       }
 
+      .hero-term {
+        margin: 0;
+      }
+      .section-title {
+        margin: 8px 0 -8px;
+        font-size: 1.35rem;
+        letter-spacing: -0.01em;
+        scroll-margin-top: 76px;
+      }
+      .intro {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        padding: 22px 24px;
+        box-shadow: var(--shadow-sm);
+        min-width: 0;
+        scroll-margin-top: 76px;
+      }
+      .panel h2 {
+        margin: 0 0 10px;
+        font-size: 1.2rem;
+      }
+      .panel p {
+        margin: 0 0 10px;
+        color: var(--muted);
+      }
+      .panel p:last-child {
+        margin-bottom: 0;
+      }
+      .panel a {
+        color: var(--accent);
+      }
+      .steps {
+        margin: 0;
+        padding-left: 22px;
+        display: grid;
+        gap: 10px;
+      }
+      .steps code,
+      .panel p code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: var(--accent-soft);
+        border-radius: 4px;
+        padding: 1px 5px;
+      }
+      /* The terminal shot on the left, the three bar strips stacked beside it. */
+      .shots {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        align-items: start;
+        gap: 18px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .shots figure {
+        margin: 0;
+        display: grid;
+        gap: 8px;
+      }
+      .shots img {
+        width: 100%;
+        height: auto;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--line);
+        background: var(--term-dark-bg);
+      }
+      .shots li:first-child {
+        grid-row: span 3;
+      }
+      @media (max-width: 760px) {
+        .shots {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .shots li:first-child {
+          grid-row: auto;
+        }
+      }
+      .shots figcaption {
+        font-size: 0.86rem;
+        color: var(--muted);
+      }
+      .trust {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .trust a {
+        display: inline-block;
+        padding: 4px 10px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-pill);
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--fg);
+        text-decoration: none;
+      }
+      .trust a:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
       @media (max-width: 640px) {
         .hero {
           padding: 20px 16px;
@@ -354,18 +456,23 @@
 
     <!--SITE_HEADER-->
 
-    <main class="wrap" id="main">
-      <section class="hero" aria-label="Introduction">
+    <main
+      class="wrap"
+      id="main"
+      data-copy="{{copy}}"
+      data-copied="{{copied}}"
+      data-copied-status="{{copiedStatus}}"
+      data-termdark="{{termDark}}"
+      data-termlight="{{termLight}}"
+    >
+      <section class="hero" aria-label="{{introLabel}}">
         <div class="hero-top">
-          <h1>A powerline-style <code>agy</code> statusline for Google Antigravity CLI</h1>
-          <p class="hero-sub">
-            See your active model, Gemini 5h/7d, Claude/GPT and Argon quotas with pace markers,
-            context window and git status at a glance. Every preview on this page is rendered by the
-            real statusline code.
-          </p>
+          <h1>{{heroTitle}}</h1>
+          <p class="hero-sub">{{heroSub}}</p>
         </div>
 
-        <div class="term-frame" data-bg="dark">
+        <figure class="term-frame hero-term" data-bg="dark">
+          <figcaption class="sr-only">{{heroBarCaption}}</figcaption>
           <div class="term-titlebar">
             <div class="term-dots" aria-hidden="true">
               <span class="term-dot"></span>
@@ -377,7 +484,7 @@
           <div class="term" data-bg="dark">
             <div class="screen"><!--HERO_BAR--></div>
           </div>
-        </div>
+        </figure>
 
         <div class="hero-actions">
           <div class="install-pill">
@@ -386,73 +493,68 @@
               type="button"
               class="btn-copy"
               data-copy="npx agy-powerline init"
-              aria-label="Copy install command"
+              aria-label="{{copyInstall}}"
             >
-              <span class="copy-label">Copy</span>
+              <span class="copy-label">{{copy}}</span>
             </button>
           </div>
-          <a class="btn btn-primary" href="./configure/">Build your bar in the browser →</a>
+          <a class="btn btn-primary" href="/configure/">{{buildInBrowser}}</a>
           <a class="btn btn-secondary" href="https://github.com/wassim-azi/agy-powerline"
-            >View on GitHub</a
+            >{{viewOnGithub}}</a
           >
         </div>
 
-        <ul class="hero-facts" aria-label="Key facts">
-          <li>
-            <strong
-              ><!--COUNT-->
-              themes</strong
-            >
-            for dark, light &amp; color-blind terminals
-          </li>
-          <li><strong>3 layouts</strong> (pills, lines &amp; classic)</li>
-          <li><strong>Zero runtime dependencies</strong></li>
-          <li><strong>Windows, macOS, Linux and WSL</strong></li>
+        <ul class="hero-facts" aria-label="{{keyFacts}}">
+          {{facts}}
         </ul>
       </section>
 
+      <!--INTRO-->
+
       <span class="sr-only" id="copyStatus" aria-live="polite"></span>
 
-      <div class="controls" role="group" aria-label="Display options">
+      <h2 class="section-title" id="themes">{{themesTitle}}</h2>
+
+      <div class="controls" role="group" aria-label="{{displayOptions}}">
         <fieldset class="control">
-          <legend>Themes</legend>
+          <legend>{{themesLegend}}</legend>
           <div class="seg">
             <input type="radio" name="kind" id="kind-all" value="all" checked /><label
               for="kind-all"
-              >All</label
+              >{{all}}</label
             >
             <input type="radio" name="kind" id="kind-dark" value="dark" /><label for="kind-dark"
-              >Dark</label
+              >{{dark}}</label
             >
             <input type="radio" name="kind" id="kind-light" value="light" /><label for="kind-light"
-              >Light</label
+              >{{light}}</label
             >
             <input type="radio" name="kind" id="kind-cb" value="colorblind" /><label for="kind-cb"
-              >Color-blind</label
+              >{{colorblind}}</label
             >
           </div>
         </fieldset>
         <fieldset class="control">
-          <legend>Terminal background</legend>
+          <legend>{{bgLegend}}</legend>
           <div class="seg">
             <input type="radio" name="bg" id="bg-match" value="match" checked /><label
               for="bg-match"
-              >Intended</label
+              >{{intended}}</label
             >
             <input type="radio" name="bg" id="bg-dark" value="dark" /><label for="bg-dark"
-              >Dark</label
+              >{{dark}}</label
             >
             <input type="radio" name="bg" id="bg-light" value="light" /><label for="bg-light"
-              >Light</label
+              >{{light}}</label
             >
           </div>
         </fieldset>
         <fieldset class="control">
-          <legend>Color vision</legend>
+          <legend>{{colorVision}}</legend>
           <div class="seg">
             <input type="radio" name="cvd" id="cvd-none" value="none" checked /><label
               for="cvd-none"
-              >Typical</label
+              >{{typical}}</label
             >
             <input type="radio" name="cvd" id="cvd-protan" value="protan" /><label for="cvd-protan"
               >Protanopia</label
@@ -471,13 +573,7 @@
         <!--CARDS-->
       </div>
 
-      <p class="note">
-        Contrast figures are the lowest across all widget colors: "Pill text" is text on a pill, "On
-        terminal" is the lines layout text on the intended terminal background. 4.5:1 is the WCAG AA
-        minimum for body text. Pill caps take the terminal's own background, so they blend into any
-        terminal. Browsers can't draw Nerd Font glyphs, so the round caps and arrows are drawn with
-        CSS in the same colors.
-      </p>
+      <p class="note">{{note}}</p>
     </main>
 
     <!--SITE_FOOTER-->
@@ -503,7 +599,7 @@
             const bgLabel = card.querySelector(".term-bg-label");
             term.dataset.bg = nextBg;
             if (frame) frame.dataset.bg = nextBg;
-            if (bgLabel) bgLabel.textContent = nextBg + " terminal";
+            if (bgLabel) bgLabel.textContent = page.dataset["term" + nextBg];
           }
           page.classList.remove("cvd-protan", "cvd-deutan", "cvd-tritan");
           if (cvd !== "none") page.classList.add("cvd-" + cvd);
@@ -520,14 +616,14 @@
 
         function markCopied(btn, text) {
           const label = btn.querySelector(".copy-label") || btn;
-          label.textContent = "Copied";
+          label.textContent = page.dataset.copied;
           btn.classList.add("copied");
           if (copyStatus) {
-            copyStatus.textContent = "Copied " + text + " to clipboard";
+            copyStatus.textContent = page.dataset.copiedStatus.replace("%s", text);
           }
           clearTimeout(btn._copyTimer);
           btn._copyTimer = setTimeout(() => {
-            label.textContent = "Copy";
+            label.textContent = page.dataset.copy;
             btn.classList.remove("copied");
           }, 1800);
         }

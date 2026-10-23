@@ -3,6 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const { readConfigFile, mergeConfig, setConfigDir } = require("../lib/shared");
+const { CONFIG_SCHEMA_URL } = require("../lib/config");
 const { resolveInstallDir, writeFileAtomic, PRIVATE_FILE_MODE } = require("../lib/paths");
 const { printInvalidConfig } = require("./config-guard");
 const { version } = require("../../package.json");
@@ -14,9 +15,9 @@ const YELLOW = "\x1b[33m";
 const RESET = "\x1b[0m";
 
 // The config as the bar reads it, with the release that wrote it first, so an
-// import can tell a file from a newer release.
+// import can tell a file from a newer release, and the schema editors check it with.
 function exportDocument(config) {
-  return { agyPowerline: { version }, ...mergeConfig(config) };
+  return { agyPowerline: { version }, $schema: CONFIG_SCHEMA_URL, ...mergeConfig(config) };
 }
 
 function execCommandCount(config) {
