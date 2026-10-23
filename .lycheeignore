@@ -4,3 +4,5 @@
 ^https://github\.com/wassim-azi/agy-powerline/stargazers$
 # Star History's #… is a client-side route, not an anchor in the page.
 ^https://star-history\.com/#
+# Root-relative links in website pages (rendered at agy-powerline.com)
+^/
