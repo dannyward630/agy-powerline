@@ -294,10 +294,13 @@ function testTooManyFiles() {
 }
 
 function test2000FileBenchmark() {
-  inHome("benchmark", ({ conversationsDir }) => {
+  inHome("benchmark", ({ installDir, conversationsDir }) => {
+    fs.writeFileSync(path.join(installDir, "statusline.config.json"), "{}");
     for (let index = 0; index < 2000; index += 1) {
       fs.writeFileSync(path.join(conversationsDir, `benchmark-${index}.db`), "");
     }
+
+    readSessionStartMs();
 
     const samples = [];
     for (let sample = 0; sample < 3; sample += 1) {

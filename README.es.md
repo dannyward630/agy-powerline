@@ -168,6 +168,7 @@ Previsualízalos todos en la [galería de temas](https://agy-powerline.com/) o c
 | `tasks`                                                       | Subagentes en ejecución y tareas en segundo plano                                                                                     |
 | `mode`                                                        | Modo de aprobación (p. ej., accept-edits) y modo Vim                                                                                  |
 | `title`                                                       | El título de la conversación                                                                                                          |
+| `sessionTime`                                                 | Tiempo desde que comenzó la conversación activa                                                                                       |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Tokens de sesión y uso de caché de prompts                                                                                            |
 | `tokensToday`, `tokensWeek`                                   | Tokens utilizados hoy y en los últimos 7 días, todas las conversaciones (Node 22.13+)                                                 |
 | `ram`                                                         | Memoria utilizada en tu equipo                                                                                                        |

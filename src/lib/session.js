@@ -27,7 +27,48 @@ const QUOTA_BUCKETS = {
 const MAX_RESET_SECONDS = 366 * 86400;
 const MAX_CONVERSATION_FILES = 2000;
 const SESSION_IDLE_MS = 30 * 60 * 1000;
+const SESSION_CACHE_NAME = ".session-cache.json";
+const SESSION_CACHE_TTL_MS = 60 * 1000;
 const SAMPLE_SESSION_START_MS = Symbol.for("agy-powerline.sampleSessionStartMs");
+
+function sessionCachePath() {
+  try {
+    const { resolveInstallDir } = require("./paths");
+    const dir = resolveInstallDir();
+    return dir && fs.existsSync(path.join(dir, "statusline.config.json"))
+      ? path.join(dir, SESSION_CACHE_NAME)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function readSessionCache(file) {
+  try {
+    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (
+      data &&
+      typeof data === "object" &&
+      Number.isFinite(data.startMs) &&
+      Number.isFinite(data.newestMtimeMs) &&
+      Number.isFinite(data.scannedAt)
+    ) {
+      return data;
+    }
+  } catch {
+    // Missing or invalid cache file.
+  }
+  return null;
+}
+
+function writeSessionCache(file, cache) {
+  try {
+    const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
+    writeFileAtomic(file, JSON.stringify(cache), { mode: PRIVATE_FILE_MODE });
+  } catch {
+    // Write failure is non-fatal.
+  }
+}
 
 // Read file metadata only. Conversation database names are IDs and never enter
 // the session object, cache or log.
@@ -36,6 +77,17 @@ function readSessionStartMs(nowMs = Date.now()) {
     if (!Number.isFinite(nowMs)) {
       return null;
     }
+    const cacheFile = sessionCachePath();
+    if (cacheFile) {
+      const cached = readSessionCache(cacheFile);
+      if (cached && nowMs - cached.scannedAt < SESSION_CACHE_TTL_MS) {
+        if (nowMs - cached.newestMtimeMs > SESSION_IDLE_MS) {
+          return null;
+        }
+        return cached.startMs;
+      }
+    }
+
     const directory = path.join(os.homedir(), ".gemini", "antigravity-cli", "conversations");
     const entries = fs
       .readdirSync(directory, { withFileTypes: true })
@@ -48,12 +100,22 @@ function readSessionStartMs(nowMs = Date.now()) {
 
     let newest = null;
     for (const entry of entries) {
-      const stat = fs.statSync(path.join(directory, entry.name));
+      const dbPath = path.join(directory, entry.name);
+      const stat = fs.statSync(dbPath);
       if (!Number.isFinite(stat.mtimeMs)) {
         return null;
       }
-      if (!newest || stat.mtimeMs > newest.mtimeMs) {
-        newest = { mtimeMs: stat.mtimeMs, birthtimeMs: stat.birthtimeMs };
+      let mtimeMs = stat.mtimeMs;
+      try {
+        const wal = fs.statSync(`${dbPath}-wal`);
+        if (Number.isFinite(wal.mtimeMs)) {
+          mtimeMs = Math.max(mtimeMs, wal.mtimeMs);
+        }
+      } catch {
+        // No write-ahead log.
+      }
+      if (!newest || mtimeMs > newest.mtimeMs) {
+        newest = { mtimeMs, birthtimeMs: stat.birthtimeMs };
       }
     }
 
@@ -68,6 +130,13 @@ function readSessionStartMs(nowMs = Date.now()) {
     const startMs = newest.birthtimeMs;
     if (startMs <= 0 || startMs > newest.mtimeMs || startMs > nowMs) {
       return null;
+    }
+    if (cacheFile) {
+      writeSessionCache(cacheFile, {
+        startMs,
+        newestMtimeMs: newest.mtimeMs,
+        scannedAt: nowMs,
+      });
     }
     return startMs;
   } catch {
