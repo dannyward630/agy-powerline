@@ -11,8 +11,8 @@ Questions, bugs and ideas go to [GitHub issues](https://github.com/wassim-azi/ag
 ## Principles
 
 - **No runtime dependencies.** The package uses only Node.js built-ins, so installing it pulls in nothing else.
-- **No network, no telemetry.** The status line and the CLI make no network requests. This site sets no cookies and loads nothing from other sites ([Privacy](/privacy/)).
-- **Your machine stays yours.** The config is read only from your own install folder, shell command widgets never run in previews, and `init` backs up agy's settings before changing them ([Security](/security/)).
+- **No network, no telemetry.** The status line and the CLI make no network requests. This site sets no cookies and loads nothing from other sites ([Privacy](privacy.md)).
+- **Your machine stays yours.** The config is read only from your own install folder, shell command widgets never run in previews, and `init` backs up agy's settings before changing them ([Security](../../../SECURITY.md)).
 - **Every preview is real.** The bars on this site are rendered by the same code that draws your bar in agy.
 - **Accessible by default.** Every theme is checked for WCAG AA contrast, and two themes are built for color-blind users.
 - **MIT licensed.** Use it, change it and share it.
@@ -27,4 +27,4 @@ Want to help? Read [CONTRIBUTING.md](https://github.com/wassim-azi/agy-powerline
 
 - Source code: [github.com/wassim-azi/agy-powerline](https://github.com/wassim-azi/agy-powerline)
 - Package: [npmjs.com/package/agy-powerline](https://www.npmjs.com/package/agy-powerline)
-- Release notes: [Changelog](/changelog/)
+- Release notes: [Changelog](../../../CHANGELOG.md)

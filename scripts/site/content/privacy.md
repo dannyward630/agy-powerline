@@ -14,7 +14,7 @@ The site is hosted on GitHub Pages. Like any web host, GitHub receives the usual
 
 ## The status line and the CLI
 
-agy-powerline makes no network requests and has no telemetry. It reads the session data agy sends it, its own config and your project's `.git` folder, and keeps a local problem log that you can read, clear or turn off. It never prints, logs or saves your email or session and conversation IDs. The [Security](/security/) page lists every file it reads and writes and every process it starts.
+agy-powerline makes no network requests and has no telemetry. It reads the session data agy sends it, its own config and your project's `.git` folder, and keeps a local problem log that you can read, clear or turn off. It never prints, logs or saves your email or session and conversation IDs. The [Security](../../../SECURITY.md) page lists every file it reads and writes and every process it starts.
 
 ## Questions
 
