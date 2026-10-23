@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const { resolveColorModeId } = require("./colors");
-const { resolveThemeId, canonicalThemeId, THEMES, normalizeGradient } = require("./themes");
+const { resolveThemeId, canonicalThemeId, normalizeGradient } = require("./themes");
 const { stripControl, normalizeClock } = require("./formatters");
 const { normalizePowerline, applyStyle, STYLES } = require("./powerline");
 const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
@@ -441,7 +441,8 @@ function applyRenderOverrides(baseConfig, overrides = {}) {
 
   if (overrides.theme !== undefined) {
     const theme = canonicalThemeId(overrides.theme);
-    if (Object.hasOwn(THEMES, theme)) {
+    // resolveThemeId() falls back to the default theme for an unknown id.
+    if (typeof overrides.theme === "string" && resolveThemeId(theme) === theme) {
       config = mergeConfig({ ...config, theme });
     } else {
       invalid.push("theme");

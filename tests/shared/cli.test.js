@@ -333,15 +333,18 @@ function testRenderOverrides() {
         env,
         input: PAYLOAD,
       });
-      return { flag, result, dump };
+      return { flag, value, result, dump };
     });
+    // The same wording as the theme, layout, preset, caps and gradient commands.
     record(
       "each invalid render override exits before output or a requested payload dump",
       invalidResults.every(
-        ({ flag, result, dump }) =>
+        ({ value, result, dump }) =>
           result.code === 1 &&
           result.stdout === "" &&
-          result.stderr.includes(`invalid ${flag} value`) &&
+          new RegExp(`Unknown [a-z ]+ "${value}"\\.\\n Available [a-z ]+: [a-z]`).test(
+            result.stderr
+          ) &&
           !fs.existsSync(dump)
       ) && fs.readFileSync(configPath, "utf8") === before,
       invalidResults.map(({ flag, result }) => `${flag}: ${result.stderr.trim()}`).join("; ")

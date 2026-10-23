@@ -7,6 +7,7 @@ const {
   resolveInstallDir,
   AGY_SETTINGS,
   statuslineCommand,
+  appendedRenderFlags,
   readInstallMeta,
   readAgySettings,
   isWsl,
@@ -222,7 +223,7 @@ async function doctorCommand(options = {}) {
     console.log();
     console.log(`${RED} No statusline.js in the install dir.${RESET}`);
     console.log("  Run: npx agy-powerline init --yes");
-  } else if (configured && expected && configured !== expected) {
+  } else if (configured && expected && appendedRenderFlags(configured, expected) === null) {
     console.log();
     console.log(`${YELLOW} settings.json command does not match this install.${RESET}`);
     console.log(`  expected  ${expected}`);

@@ -51,7 +51,7 @@ To try a different look without changing `statusline.config.json`, append render
 C:/Users/you/.agy-powerline/statusline.cmd --theme light-paper --layout lines
 ```
 
-The same `--preset`, `--layout`, `--theme`, `--caps` and `--gradient` options work on both platforms. The Windows launcher forwards them to `statusline.js`.
+The same `--preset`, `--layout`, `--theme`, `--caps` and `--gradient` options work on both platforms. The Windows launcher forwards them to `statusline.js`; an install made before these flags existed needs one `npx agy-powerline init --yes` to get that launcher. A later `init` keeps the flags you appended, as long as the command before them is still the one it writes. `doctor` lists them under `overrides`.
 
 `init` also writes `install.json` (installed CLI version, Node path, platform, timestamp) and a default `statusline.config.json` (only when none exists).
 
