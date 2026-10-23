@@ -8,7 +8,9 @@
 const fs = require("fs");
 const path = require("path");
 const { buildBrowserBundle } = require("./bundle");
-const { injectSiteChrome } = require("../site/layout");
+const { injectSiteChrome, SITE_URL } = require("../site/layout");
+const { breadcrumbData } = require("../site/doc-page");
+const { renderPreview } = require("./page");
 const {
   THEMES,
   THEME_ORDER,
@@ -18,7 +20,7 @@ const {
 } = require("../../src/lib/themes");
 const { WIDGET_CATALOG } = require("../../src/lib/catalog");
 const { WIDGET_TAGS } = require("../../src/lib/widget-style");
-const { PRESETS, PRESET_ORDER } = require("../../src/lib/config");
+const { PRESETS, PRESET_ORDER, defaultConfig } = require("../../src/lib/config");
 const { STYLES, STYLE_ORDER } = require("../../src/lib/powerline");
 
 const repo = path.join(__dirname, "..", "..");
@@ -70,18 +72,43 @@ function buildConfiguratorHtml() {
   const pageLogicPath = path.join(__dirname, "page.js");
 
   const rawTemplate = fs.readFileSync(templatePath, "utf8");
+  const description =
+    "agy statusline configurator: build your bar in the browser with widgets, a theme and a layout, see a live preview, then download the config or import it with npx agy-powerline.";
   const template = injectSiteChrome(rawTemplate, {
-    title: "Build your agy statusline in the browser · agy-powerline",
-    description:
-      "Build your agy statusline in the browser: pick widgets, a theme and a layout with a live preview, then download the config or import it with npx agy-powerline.",
+    title: "agy statusline configurator - build your bar in the browser",
+    description,
     currentPage: "configurator",
-    rootPrefix: "../",
     pagePath: "configure/",
+    structuredData: [
+      breadcrumbData([
+        { name: "agy-powerline", path: "" },
+        { name: "Configurator", path: "configure/" },
+      ]),
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "agy statusline configurator",
+        description,
+        url: `${SITE_URL}configure/`,
+        applicationCategory: "DeveloperApplication",
+        operatingSystem: "Any (runs in the browser)",
+        isAccessibleForFree: true,
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      },
+    ],
   });
   const bundleCode = buildBrowserBundle();
   const pageLogicCode = fs.readFileSync(pageLogicPath, "utf8");
+  // The default bar, drawn at build time: crawlers see a real bar, and the
+  // page doesn't shift when the script draws it again.
+  const preview = renderPreview(defaultConfig(), {
+    sampleKind: "normal",
+    terminalWidth: 96,
+    colorDepth: "truecolor",
+  }).html;
 
   return template
+    .replace("<!--PREVIEW-->", preview)
     .replace("<!--PALETTE_ITEMS-->", buildPaletteItems())
     .replace("<!--THEME_OPTIONS-->", buildThemeOptions())
     .replace("<!--PRESET_OPTIONS-->", buildPresetOptions())

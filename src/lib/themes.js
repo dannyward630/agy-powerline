@@ -9,7 +9,7 @@ const { parseColor, parseGradientStops, luminance } = require("./colors");
 //                 protanopia, deuteranopia and tritanopia
 // Most dark-* and light-* colors come from VS Code's default themes (Dark+
 // and Light+ syntax, git decorations, warning/error and terminal colors);
-// nocturne, onyx, metro, cream and macchiato take their palettes from
+// nocturne, onyx, metro, macchiato, nord, rose-pine and cream take their palettes from
 // community themes (credited below). A few colors are adjusted where the
 // checks below need it: darkened or lightened for contrast, and gitDirty
 // moved toward orange so a dirty branch never looks like the caution state.
@@ -191,6 +191,38 @@ const THEMES = {
     warn: "#ed8796",
   }),
 
+  // Palette from Nord (nordtheme.com, MIT).
+  "dark-nord": theme("dark", "Dark Nord", "Arctic frost blues with aurora accents", {
+    text: DARK_TEXT,
+    track: "#4c566a",
+    model: "#b48ead",
+    fiveHour: "#a3be8c",
+    weekly: "#88c0d0",
+    thirdParty: "#d08770",
+    context: "#81a1c1",
+    git: "#8fbcbb",
+    gitDirty: "#d08770",
+    meta: "#d8dee9",
+    caution: "#ebcb8b",
+    warn: "#d57780",
+  }),
+
+  // Palette from Rosé Pine (rosepinetheme.com, MIT).
+  "dark-rose-pine": theme("dark", "Dark Rose Pine", "Muted iris, foam, rose and gold", {
+    text: DARK_TEXT,
+    track: "#403d52",
+    model: "#c4a7e7",
+    fiveHour: "#9ccfd8",
+    weekly: "#ebbcba",
+    thirdParty: "#ea9a97",
+    context: "#5ea6c6",
+    git: "#6fb3bd",
+    gitDirty: "#ea9a97",
+    meta: "#e0def4",
+    caution: "#f6c177",
+    warn: "#eb6f92",
+  }),
+
   "light-paper": theme("light", "Light Paper", "VS Code Light+ colors", {
     text: LIGHT_TEXT,
     track: "#c8c8c8",
@@ -328,6 +360,8 @@ const THEME_ORDER = [
   "dark-onyx",
   "dark-metro",
   "dark-macchiato",
+  "dark-nord",
+  "dark-rose-pine",
   "light-paper",
   "light-sky",
   "light-sunset",

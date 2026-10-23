@@ -147,6 +147,10 @@ function ansiRuns(text) {
   });
 }
 
+// Runs that are only meter cells and pace markers. Screen readers would read
+// each one as "bullet"; the percentage printed next to the meter says it all.
+const METER_ONLY = /^[\s•●○◉█░▓▒┃│]*[•●○◉█░▓▒┃][\s•●○◉█░▓▒┃│]*$/;
+
 function ansiToHtml(text) {
   return ansiRuns(text)
     .map((runs) => {
@@ -162,7 +166,8 @@ function ansiToHtml(text) {
         if (r.bg) style.push(`background:${css(r.bg)}`);
         if (r.bold) style.push("font-weight:700");
         if (r.dim) style.push("opacity:0.65");
-        html += `<span class="r"${style.length ? ` style="${style.join(";")}"` : ""}>${esc(r.text)}</span>`;
+        const hidden = METER_ONLY.test(r.text) ? ' aria-hidden="true"' : "";
+        html += `<span class="r"${hidden}${style.length ? ` style="${style.join(";")}"` : ""}>${esc(r.text)}</span>`;
       }
       return `<div class="ln">${html || "&nbsp;"}</div>`;
     })

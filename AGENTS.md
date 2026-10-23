@@ -20,6 +20,8 @@ Run all of these from the repo root.
 | Render the bar with demo data | `node src/index.js render --demo`                                  |
 | Render a payload file         | `node src/index.js render < tests/fixtures/antigravity-1.3.0.json` |
 | Theme preview page            | `npm run gallery` (writes `gallery.html`, gitignored)              |
+| Build the website             | `npm run site` (writes `_site/`, gitignored)                       |
+| Social card and site icons    | `npm run site:images` (needs Chrome; writes `assets/site/`)        |
 | Theme screenshots (SVG)       | `npm run screenshots` (writes `screenshots/`, gitignored)          |
 | Demo GIF                      | `vhs scripts/demo/demo.tape` (writes `assets/demo.gif`)            |
 
@@ -58,8 +60,9 @@ Suite names are the `registerSuite()` calls in `tests/shared.js` (e.g. `renderer
 - `src/lib/exec.js`: the `exec` (shell command) widget.
 - `src/lib/log.js`: the local problem log; `payload-dump.js`: privacy-safe payload dumps; `mock-data.js`: the `render --demo` sample payload; `run.js`: runs a command and captures its output (doctor's live check); `prompt.js`: yes/no prompts for `init` and `uninstall`.
 - `tests/shared/*.test.js`: cross-platform suites; `tests/platform/`: launcher tests per OS; `tests/snapshots/`: expected output; `tests/fixtures/`: sample payloads.
-- `docs/`: user docs beyond the README (`configuration.md`, `install.md`, `troubleshooting.md`).
-- `scripts/gallery/`: the `npm run gallery` theme preview and `npm run screenshots`; `scripts/hooks/`: the git hooks (`.githooks/` points at them); `scripts/release/`: the plugin archives `release.yml` attaches to each release; `scripts/demo/`: the [VHS](https://github.com/charmbracelet/vhs) tape that records `assets/demo.gif`.
+- `docs/`: user docs beyond the README (`configuration.md`, `install.md`, `troubleshooting.md`, `payload.md`, `faq.md`) and `docs/guides/`; all of them are pages of the site too.
+- `scripts/site/`: agy-powerline.com, published by `.github/workflows/pages.yml`. `build.js` writes every page into `_site/` (home, configurator, the Markdown docs and guides, the widget page, the quota calculator) with the sitemap, feed, `llms.txt` and the config JSON Schema (`config-schema.js`); `layout.js` holds the shared head, header and footer, `doc-page.js` the docs page, `markdown.js` the Markdown renderer, `home-text.js` the home page's English and French text, `images.js` the social card and icons in `assets/site/`; `content/` has the About and Privacy pages. A doc page gets on the site through `MARKDOWN_PAGES` or `GUIDES` in `build.js`.
+- `scripts/gallery/`: the theme gallery (the site's home page) and `npm run screenshots`; `scripts/hooks/`: the git hooks (`.githooks/` points at them); `scripts/release/`: the plugin archives `release.yml` attaches to each release; `scripts/demo/`: the [VHS](https://github.com/charmbracelet/vhs) tape that records `assets/demo.gif`.
 
 The installed runtime is a **copy**: `init` joins `src/runtime/statusline.js` and the files listed in `RUNTIME_FILES` (`src/lib/paths.js`) into one `~/.agy-powerline/statusline.js` (`src/cli/bundle.js`), because Node opens one file much faster than many. If runtime code needs a new file in `src/lib/`, add it to `RUNTIME_FILES`. The runtime must never require `src/cli/` or anything outside that list; inside the bundle such a require fails.
 
@@ -126,7 +129,7 @@ Most outside pull requests are written with an AI agent. These rules keep them m
   - One line per change, written for users, under the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) heading that fits (`### Added`, `### Changed`, `### Fixed`, `### Removed`, `### Security`), ending with the issue or PR number when there is one, e.g. `- Battery widget shows charging state (#42)`. The release notes are written from these lines.
 - **Contributor credits are the maintainer's job.** When merging an outside contribution, the maintainer adds the credit to its changelog line, `(#42, thanks @login)`, and runs `npx all-contributors-cli@6.26.1 add <login> <types>` (types such as `code`, `doc`, `design`, `translation`), which updates `.all-contributorsrc` and the table between the `ALL-CONTRIBUTORS-LIST` markers in every README listed in its `files`; both files go in one commit. A pull request doesn't touch either, except that a new README translation copies the table as it is and adds its file name to `files` in `.all-contributorsrc`. `.github/workflows/thanks.yml` thanks the contributor on merge.
 - Don't change `version` in `package.json`; the maintainer sets it at release time.
-- Never commit `gallery.html`, `screenshots/`, `node_modules/`, coverage output or `.tgz` files.
+- Never commit `gallery.html`, `_site/`, `screenshots/`, `node_modules/`, coverage output or `.tgz` files.
 - PR description: what changed and why, `Fixes #<issue>` if relevant, the commands you ran, and a screenshot or snapshot diff for visual changes.
 
 ## Security reports
