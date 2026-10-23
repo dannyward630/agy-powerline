@@ -13,4 +13,5 @@ e0ba = "e0ba"
 unparseable = "unparseable"
 # A test cuts "middleware" short on purpose.
 middlewar = "middlewar"
-PNGs = "PNGs"
+# A French label in scripts/site/layout.js
+Projet = "Projet"
