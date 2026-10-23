@@ -20,7 +20,7 @@ const { setConfigDir, readConfigFile, renderStatusline, sampleData } = require("
 const { resolveInstallDir, isTrustedInstallDir } = require("./lib/paths");
 const { isLogEnabled, setLogDir, logError, jsonErrorMessage } = require("./lib/log");
 const { dumpTarget, writePayloadDump } = require("./lib/payload-dump");
-const { version: VERSION } = require("../package.json");
+const { version: VERSION, homepage: SITE_URL } = require("../package.json");
 
 const NAME = "agy-powerline";
 const DESCRIPTION = "Interactive statusline for Google Antigravity";
@@ -248,6 +248,8 @@ function programHelp() {
     "",
     "Commands:",
     formatRows(rows),
+    "",
+    `Themes, docs and the browser configurator: ${SITE_URL}`,
     "",
   ].join("\n");
 }

@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `sessionTime` shows how long the active conversation has been running (#96)
 - The README in Spanish (README.es.md) (#52)
+- agy-powerline.com has the docs, guides, every widget with a preview, a quota pace calculator, an FAQ and a French home page, all built from the repo
+- A JSON Schema for `statusline.config.json` (https://agy-powerline.com/schema/v1.json): `init`, `export` and the browser configurator write its `$schema` line, so editors such as VS Code complete and check the file
+- Two dark themes with the Nord and Rosé Pine palettes: `dark-nord` and `dark-rose-pine`
+- `init` and `--help` show the site's address
 
 ## [1.5.0] - 2026-10-21
 

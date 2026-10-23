@@ -70,6 +70,9 @@ const VALID_WIDGET_IDS = new Set([
   "lineBreak",
 ]);
 
+// Editors that read "$schema" complete and check the config file with it.
+const CONFIG_SCHEMA_URL = "https://agy-powerline.com/schema/v1.json";
+
 let configDir = __dirname;
 
 function setConfigDir(dir) {
@@ -173,6 +176,10 @@ function mergeConfig(raw) {
   if (rawThresholds.blink !== undefined) thresholds.blink = rawThresholds.blink;
 
   const result = {
+    // Kept so an editor keeps checking the file after the CLI saves it.
+    ...(typeof raw?.$schema === "string" && raw.$schema.length <= 2048
+      ? { $schema: stripControl(raw.$schema) }
+      : {}),
     theme: resolveThemeId(raw?.theme ?? fallback.theme),
     emojis: raw?.emojis !== false,
     ascii: raw?.ascii === true,
@@ -408,6 +415,7 @@ function applyPreset(baseConfig, presetName) {
 }
 
 module.exports = {
+  CONFIG_SCHEMA_URL,
   setConfigDir,
   getConfigDir,
   getConfigPath,

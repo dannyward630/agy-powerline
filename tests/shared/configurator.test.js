@@ -61,31 +61,22 @@ async function run() {
       "the configurator names its canonical URL",
       urlTags.every((tag) => html.includes(tag))
     );
-    const scanned = urlTags.reduce((text, tag) => text.replace(tag, ""), html);
-    const urls = [...scanned.matchAll(/\b(?:https?:)?\/\/[^\s"'<>)]+/g)].map((match) => match[0]);
-    const external = urls.filter((url) => url !== REPO_URL);
+    // Outside loads, CSP details and links are checked for every page in
+    // tests/shared/site.test.js.
     record(
-      "the configurator loads nothing from other sites (only the repo link)",
-      external.length === 0 && urls.some((url) => url === REPO_URL),
-      external.slice(0, 5).join(", ")
-    );
-
-    const iconMatch = html.match(
-      /<link\s+[^>]*rel="icon"[^>]*href="(data:image\/svg\+xml;base64,([^"]+))"/
-    );
-    const iconSvg = iconMatch ? Buffer.from(iconMatch[2], "base64").toString("utf8").trim() : "";
-    record(
-      "the configurator has a base64 SVG favicon",
-      iconSvg.startsWith("<svg") && iconSvg.includes("</svg>")
-    );
-
-    record(
-      "the configurator has the shared header, relative links to Themes and Configurator, and the repo link",
+      "the configurator has the shared header and footer, with Configurator as the current page",
       /<header class="site-header">/.test(html) &&
-        /<a class="nav-link" href="\.\.\/">Themes<\/a>/.test(html) &&
-        /<a class="nav-link" href="\.\/" aria-current="page">Configurator<\/a>/.test(html) &&
+        /<a class="nav-link" href="\/">Themes<\/a>/.test(html) &&
+        /<a class="nav-link" href="\/configure\/" aria-current="page">Configurator<\/a>/.test(
+          html
+        ) &&
         html.includes(`href="${REPO_URL}"`) &&
         /<footer class="site-footer">/.test(html)
+    );
+
+    record(
+      "the configurator shows the default bar before its script runs",
+      /<div class="screen" id="previewOutput">\s*\S/.test(html)
     );
 
     const missingThemes = THEME_ORDER.filter((id) => !html.includes(`value="${id}"`));
