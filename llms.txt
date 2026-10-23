@@ -41,6 +41,8 @@
 - `dark-onyx`
 - `dark-metro`
 - `dark-macchiato`
+- `dark-nord`
+- `dark-rose-pine`
 - `light-paper`
 - `light-sky`
 - `light-sunset`
@@ -101,9 +103,10 @@
 - `customText` — Your own text.
 
 ## Config
-Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, use `$AGY_POWERLINE_HOME/statusline.config.json`. See [Configuration](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/configuration.md).
+Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, use `$AGY_POWERLINE_HOME/statusline.config.json`. See [Configuration](https://agy-powerline.com/docs/configuration/).
 ```json
 {
+  "$schema": "https://agy-powerline.com/schema/v1.json",
   "theme": "dark-aurora",
   "layout": "pills",
   "ascii": false,
@@ -121,8 +124,15 @@ Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, u
 - `import` asks before adding shell commands; never pass `--allow-exec` without approval of the exact commands.
 
 ## Docs
+- [Website](https://agy-powerline.com/): themes, docs and the browser configurator
 - [README](https://github.com/wassim-azi/agy-powerline#readme)
-- [Configuration](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/configuration.md)
-- [Install](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/install.md)
-- [Troubleshooting](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/troubleshooting.md)
-- [Security](https://github.com/wassim-azi/agy-powerline/blob/develop/SECURITY.md)
+- [Install](https://agy-powerline.com/install/)
+- [Configuration](https://agy-powerline.com/docs/configuration/)
+- [Widgets, with previews](https://agy-powerline.com/widgets/)
+- [Payload reference](https://agy-powerline.com/docs/payload/): what agy sends to the status line
+- [Troubleshooting](https://agy-powerline.com/troubleshooting/)
+- [FAQ](https://agy-powerline.com/faq/)
+- [Guides](https://agy-powerline.com/guides/)
+- [Quota pace calculator](https://agy-powerline.com/quota-calculator/)
+- [Config JSON Schema](https://agy-powerline.com/schema/v1.json)
+- [Security](https://agy-powerline.com/security/)

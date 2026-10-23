@@ -39,6 +39,8 @@ const { createRl, confirm, choose } = require("../lib/prompt");
 const { printInvalidConfig } = require("./config-guard");
 const { buildRuntimeBundle } = require("./bundle");
 const { REPO_URL } = require("./repo-url");
+const { CONFIG_SCHEMA_URL } = require("../lib/config");
+const { homepage: SITE_URL } = require("../../package.json");
 
 const DIM = "\x1b[2m";
 const BOLD = "\x1b[1m";
@@ -305,7 +307,8 @@ async function initCommand(options = {}) {
 
     setConfigDir(installDir);
     if (firstInstall) {
-      saveConfig(applyChoices(defaultConfig(), choices));
+      // A new config names its schema, so editors complete and check it.
+      saveConfig({ $schema: CONFIG_SCHEMA_URL, ...applyChoices(defaultConfig(), choices) });
     } else if (existingConfig) {
       saveConfig(applyChoices(existingConfig, choices));
     }
@@ -342,6 +345,8 @@ async function initCommand(options = {}) {
     console.log(`${CYAN}  npx agy-powerline doctor${RESET}`);
     console.log("  then restart Antigravity / open a new session.");
     console.log();
+    console.log(`${DIM} Themes, docs and the browser configurator:${RESET}`);
+    console.log(`${DIM}  ${SITE_URL}${RESET}`);
     console.log(`${DIM} Like it? A star on GitHub helps others find it:${RESET}`);
     console.log(`${DIM}  ${REPO_URL}${RESET}`);
     console.log();

@@ -8,6 +8,7 @@ const { isMeterStyle } = require("./widget-style");
 
 const KNOWN_KEYS = new Set([
   ...Object.keys(defaultConfig()),
+  "$schema",
   "customTheme",
   "gradient",
   "meterStyle",

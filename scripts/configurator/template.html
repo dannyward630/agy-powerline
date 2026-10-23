@@ -4,10 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- Nothing loads from other sites: the page is its own inline style and script. -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"
-    />
+    <!--SITE_CSP-->
     <!--SITE_HEAD-->
     <style>
       /* SITE_CSS */
@@ -114,6 +111,7 @@
         border-radius: var(--radius-lg);
         padding: 20px;
         display: grid;
+        align-content: start;
         gap: 16px;
         box-shadow: var(--shadow-sm);
         min-width: 0;
@@ -203,10 +201,32 @@
         background: var(--accent-soft);
       }
 
+      /* The preview is rendered at build time and the widget list fills in
+         after load; both keep their room so the page doesn't shift. */
+      #previewOutput {
+        min-height: calc(3 * 1.45em);
+      }
+
       /* Active Widgets List */
       .active-rows {
         display: grid;
         gap: 12px;
+        min-height: 240px;
+      }
+      .about-tool p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 80ch;
+      }
+      .about-tool code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: var(--accent-soft);
+        border-radius: 4px;
+        padding: 1px 5px;
+      }
+      .about-tool a {
+        color: var(--accent);
       }
       .row-box {
         border: 1px solid var(--line);
@@ -215,6 +235,14 @@
         background: var(--bg);
         display: grid;
         gap: 8px;
+      }
+      /* Grid items default to their longest line; letting them shrink keeps
+         the widget list inside a phone-wide card (descriptions get an …). */
+      .card > *,
+      .active-rows > *,
+      .row-box > *,
+      .widget-item > * {
+        min-width: 0;
       }
       .row-header {
         font-size: 0.75rem;
@@ -250,6 +278,7 @@
         font-size: 0.9rem;
       }
       .widget-extra {
+        min-width: 0;
         font-size: 0.78rem;
         color: var(--muted);
         font-family: var(--font-mono);
@@ -448,8 +477,10 @@
 
     <main class="wrap" id="main">
       <div class="page-heading">
-        <h1>agy Statusline Configurator</h1>
-        <p>Customize widgets, themes and powerline style with a live preview.</p>
+        <h1>agy statusline configurator</h1>
+        <p>
+          Build your bar in the browser: widgets, themes and powerline style with a live preview.
+        </p>
       </div>
 
       <!-- Live Preview Card -->
@@ -505,7 +536,7 @@
               <span class="term-title" id="termTitle">dark-aurora · dark terminal</span>
             </div>
             <div class="term" id="termScreen" data-bg="dark">
-              <div class="screen" id="previewOutput"></div>
+              <div class="screen" id="previewOutput"><!--PREVIEW--></div>
             </div>
           </div>
         </div>
@@ -693,6 +724,31 @@
           <div id="pasteFeedback"></div>
         </div>
       </section>
+
+      <section class="card about-tool" aria-labelledby="howItWorks">
+        <h2 class="card-title" id="howItWorks">How the configurator works</h2>
+        <p>
+          This page is an agy statusline generator: it builds the
+          <code>statusline.config.json</code> file that agy-powerline reads on every refresh. The
+          preview above is drawn by the same code that draws your bar in Antigravity CLI, from
+          sample data, so what you see is what agy shows.
+        </p>
+        <p>
+          Start from a preset, add widgets from the palette, reorder them and open a widget's
+          options with the gear. Pick a theme for your terminal's background, a layout (Pills, Lines
+          or Classic) and a powerline shape. The Sample buttons show the bar when a quota is getting
+          low, and the Width slider shows how it fits a narrow window.
+        </p>
+        <p>
+          When it looks right, download the file and run
+          <code>npx agy-powerline import statusline.config.json</code>: it shows what will change
+          and asks before applying. Don't have agy-powerline yet? Run
+          <code>npx agy-powerline init</code> first (<a href="/install/">install guide</a>).
+          Everything happens in your browser: nothing is uploaded, and a share link keeps the config
+          after the <code>#</code>, which browsers never send to a server. Every option is described
+          in the <a href="/docs/configuration/">configuration reference</a>.
+        </p>
+      </section>
     </main>
 
     <!--SITE_FOOTER-->
@@ -847,8 +903,14 @@
           execWarning.style.display = Page.hasExecWidgets(state.config.widgets) ? "block" : "none";
 
           // Output JSON
-          const merged = Agy.mergeConfig(state.config);
-          configJson.textContent = JSON.stringify(merged, null, 2);
+          // The file names its schema, so editors complete and check it; the
+          // share link leaves it out to stay short.
+          const { $schema: _schema, ...merged } = Agy.mergeConfig(state.config);
+          configJson.textContent = JSON.stringify(
+            { $schema: Agy.CONFIG_SCHEMA_URL, ...merged },
+            null,
+            2
+          );
 
           // Share link
           const baseUrl = window.location.href.split("#")[0];
