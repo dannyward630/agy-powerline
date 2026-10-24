@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `light-tokyo-night` theme with the Tokyo Night Light palette, deepened where the contrast checks need it (#65)
 - The README in Spanish (README.es.md) (#52)
 - The README in Korean (README.ko.md) (#53)
 - `light-gruvbox` theme: the light mode of Gruvbox, deepened where the contrast checks need it (#66)

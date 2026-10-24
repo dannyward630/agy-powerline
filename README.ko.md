@@ -95,7 +95,7 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 | 터미널 배경 | 테마                                                                                                                                                                                     |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 다크        | `dark-aurora` (기본값), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-nord`, `dark-rose-pine` |
-| 라이트      | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`                                                                                                               |
+| 라이트      | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                          |
 | 색약 친화   | `colorblind-dark`, `colorblind-light`                                                                                                                                                    |
 | 직접 지정   | `custom` ([방법](docs/configuration.md#custom-theme))                                                                                                                                    |
 
