@@ -93,7 +93,7 @@ Start from a preset, then adjust:
 | Terminal background | Themes                                                                                                                                                                                    |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Dark                | `dark-aurora` (default), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-nord`, `dark-rose-pine` |
-| Light               | `light-paper`, `light-sky`, `light-sunset`, `light-cream`                                                                                                                                 |
+| Light               | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`                                                                                                                |
 | Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                                                                     |
 | Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                                                                      |
 

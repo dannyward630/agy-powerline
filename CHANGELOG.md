@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - The README in Spanish (README.es.md) (#52)
+- `light-gruvbox` theme: the light mode of Gruvbox, deepened where the contrast checks need it (#66)
 - agy-powerline.com has the docs, guides, every widget with a preview, a quota pace calculator, an FAQ and a French home page, all built from the repo
 - A JSON Schema for `statusline.config.json` (https://agy-powerline.com/schema/v1.json): `init`, `export` and the browser configurator write its `$schema` line, so editors such as VS Code complete and check the file
 - Two dark themes with the Nord and Rosé Pine palettes: `dark-nord` and `dark-rose-pine`

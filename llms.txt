@@ -47,6 +47,7 @@
 - `light-sky`
 - `light-sunset`
 - `light-cream`
+- `light-gruvbox`
 - `colorblind-dark`
 - `colorblind-light`
 - `custom` — Your own colors.

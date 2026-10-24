@@ -82,7 +82,7 @@ Choisissez un préréglage comme point de départ, puis personnalisez-le :
 | Fond du terminal        | Thèmes                                                                                                                                                                                       |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Sombre                  | `dark-aurora` (par défaut), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-nord`, `dark-rose-pine` |
-| Clair                   | `light-paper`, `light-sky`, `light-sunset`, `light-cream`                                                                                                                                    |
+| Clair                   | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`                                                                                                                   |
 | Adapté au daltonisme    | `colorblind-dark`, `colorblind-light`                                                                                                                                                        |
 | Couleurs personnalisées | `custom` ([mode d’emploi](docs/configuration.md#custom-theme))                                                                                                                               |
 

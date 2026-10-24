@@ -95,7 +95,7 @@ Comienza desde un preajuste y luego ajústalo:
 | Fondo de la terminal | Temas                                                                                                                                                                                            |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Oscuro               | `dark-aurora` (predeterminado), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-nord`, `dark-rose-pine` |
-| Claro                | `light-paper`, `light-sky`, `light-sunset`, `light-cream`                                                                                                                                        |
+| Claro                | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`                                                                                                                       |
 | Apto para daltonismo | `colorblind-dark`, `colorblind-light`                                                                                                                                                            |
 | Tus propios colores  | `custom` ([cómo hacerlo](docs/configuration.md#custom-theme))                                                                                                                                    |
 
