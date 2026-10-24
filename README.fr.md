@@ -1,6 +1,6 @@
 # agy-powerline
 
-[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | **Français** | [Español](README.es.md)
+[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | **Français** | [Español](README.es.md) | [한국어](README.ko.md)
 
 [![Version](https://img.shields.io/npm/v/agy-powerline.svg)](https://www.npmjs.com/package/agy-powerline)
 [![Downloads](https://img.shields.io/npm/d18m/agy-powerline.svg?cacheSeconds=86400)](https://www.npmjs.com/package/agy-powerline)
@@ -82,7 +82,7 @@ Choisissez un préréglage comme point de départ, puis personnalisez-le :
 | Fond du terminal        | Thèmes                                                                                                                                                                                       |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Sombre                  | `dark-aurora` (par défaut), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-nord`, `dark-rose-pine` |
-| Clair                   | `light-paper`, `light-sky`, `light-sunset`, `light-cream`                                                                                                                                    |
+| Clair                   | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                              |
 | Adapté au daltonisme    | `colorblind-dark`, `colorblind-light`                                                                                                                                                        |
 | Couleurs personnalisées | `custom` ([mode d’emploi](docs/configuration.md#custom-theme))                                                                                                                               |
 
