@@ -1,6 +1,6 @@
 # agy-powerline
 
-[English](README.md) | [简体中文](README.zh-CN.md) | **日本語** | [Français](README.fr.md) | [Español](README.es.md)
+[English](README.md) | [简体中文](README.zh-CN.md) | **日本語** | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md)
 
 [![Version](https://img.shields.io/npm/v/agy-powerline.svg)](https://www.npmjs.com/package/agy-powerline)
 [![Downloads](https://img.shields.io/npm/d18m/agy-powerline.svg?cacheSeconds=86400)](https://www.npmjs.com/package/agy-powerline)
@@ -82,7 +82,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | ターミナルの背景 | テーマ                                                                                                                                                                                        |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ダーク           | `dark-aurora`（デフォルト）、`dark-ocean`、`dark-ember`、`dark-forest`、`dark-neon`、`dark-mono`、`dark-nocturne`、`dark-onyx`、`dark-metro`、`dark-macchiato`、`dark-nord`、`dark-rose-pine` |
-| ライト           | `light-paper`、`light-sky`、`light-sunset`、`light-cream`、`light-tokyo-night`                                                                                                                |
+| ライト           | `light-paper`、`light-sky`、`light-sunset`、`light-cream`、`light-gruvbox`、`light-tokyo-night`                                                                                               |
 | 色覚多様性に配慮 | `colorblind-dark`、`colorblind-light`                                                                                                                                                         |
 | 独自の配色       | `custom`（[方法](docs/configuration.md#custom-theme)）                                                                                                                                        |
 

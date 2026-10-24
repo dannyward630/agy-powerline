@@ -9,8 +9,8 @@ const { parseColor, parseGradientStops, luminance } = require("./colors");
 //                 protanopia, deuteranopia and tritanopia
 // Most dark-* and light-* colors come from VS Code's default themes (Dark+
 // and Light+ syntax, git decorations, warning/error and terminal colors);
-// nocturne, onyx, metro, macchiato, nord, rose-pine, cream and tokyo-night take their palettes from
-// community themes (credited below). A few colors are adjusted where the
+// nocturne, onyx, metro, macchiato, nord, rose-pine, cream, gruvbox and tokyo-night take their
+// palettes from community themes (credited below). A few colors are adjusted where the
 // checks below need it: darkened or lightened for contrast, and gitDirty
 // moved toward orange so a dirty branch never looks like the caution state.
 // Palettes are checked by tests/shared/themes.test.js: pill text and lines
@@ -284,6 +284,22 @@ const THEMES = {
     warn: "#d20f39",
   }),
 
+  // Palette from Gruvbox Light (github.com/morhetz/gruvbox, MIT).
+  "light-gruvbox": theme("light", "Light Gruvbox", "Retro earthy purple, aqua and orange", {
+    text: LIGHT_TEXT,
+    track: "#bdae93",
+    model: "#8f3f71",
+    fiveHour: "#736e0d",
+    weekly: "#076678",
+    thirdParty: "#af3a03",
+    context: "#427b58",
+    git: "#3c3836",
+    gitDirty: "#af3a03",
+    meta: "#6f6560",
+    caution: "#64410b",
+    warn: "#9d0006",
+  }),
+
   // Palette from Tokyo Night Light (tokyo-night/tokyo-night-vscode-theme, MIT).
   "light-tokyo-night": theme("light", "Light Tokyo Night", "Ink blue, violet and moss green", {
     text: LIGHT_TEXT,
@@ -382,6 +398,7 @@ const THEME_ORDER = [
   "light-sky",
   "light-sunset",
   "light-cream",
+  "light-gruvbox",
   "light-tokyo-night",
   "colorblind-dark",
   "colorblind-light",
