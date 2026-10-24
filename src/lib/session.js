@@ -1,10 +1,13 @@
 "use strict";
 
+const fs = require("fs");
 const os = require("os");
+const path = require("path");
 const { formatReset, resetInSeconds, firstText, stripControl } = require("./formatters");
 const { resolveGit, resolveGitDetails } = require("./git");
-const { resolveUsage } = require("./usage");
-const { isWsl } = require("./paths");
+const { resolveUsage, conversationsDir } = require("./usage");
+const { isWsl, resolveInstallDir, writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
+const { logWarning } = require("./log");
 
 const FIVE_HOURS = 5 * 3600;
 const SEVEN_DAYS = 7 * 86400;
@@ -22,6 +25,117 @@ const QUOTA_BUCKETS = {
 };
 // No quota window lasts a year: a reset further out is a broken value.
 const MAX_RESET_SECONDS = 366 * 86400;
+const MAX_CONVERSATION_FILES = 2000;
+const SESSION_IDLE_MS = 30 * 60 * 1000;
+const SESSION_CACHE_NAME = ".session-cache.json";
+const SESSION_CACHE_TTL_MS = 60 * 1000;
+const SAMPLE_SESSION_START_MS = Symbol.for("agy-powerline.sampleSessionStartMs");
+
+function sessionCachePath() {
+  try {
+    const dir = resolveInstallDir();
+    return dir && fs.existsSync(path.join(dir, "statusline.config.json"))
+      ? path.join(dir, SESSION_CACHE_NAME)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function readSessionCache(file) {
+  try {
+    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (
+      data &&
+      typeof data === "object" &&
+      (data.startMs === null || Number.isFinite(data.startMs)) &&
+      (data.newestMtimeMs === null || Number.isFinite(data.newestMtimeMs)) &&
+      Number.isFinite(data.scannedAt)
+    ) {
+      return data;
+    }
+  } catch {
+    // Missing or invalid cache file.
+  }
+  return null;
+}
+
+function writeSessionCache(file, cache) {
+  try {
+    writeFileAtomic(file, JSON.stringify(cache), { mode: PRIVATE_FILE_MODE });
+  } catch {
+    // Write failure is non-fatal.
+  }
+}
+
+// A scan's result, kept for SESSION_CACHE_TTL_MS. startMs is null when the
+// scan found nothing to show, so an idle or unusable folder isn't rescanned on
+// every refresh either.
+function scanSessionStart(nowMs) {
+  const directory = conversationsDir();
+  const listing = fs.readdirSync(directory, { withFileTypes: true });
+  const entries = listing.filter((entry) => entry.isFile() && entry.name.endsWith(".db"));
+  // Only stat the -wal files the listing has: a failed stat costs as much as a
+  // real one, and most databases have none.
+  const wals = new Set(listing.filter((e) => e.name.endsWith(".db-wal")).map((e) => e.name));
+
+  if (entries.length > MAX_CONVERSATION_FILES) {
+    logWarning("SESSION_TOO_MANY_FILES");
+    return { startMs: null, newestMtimeMs: null };
+  }
+
+  let newest = null;
+  for (const entry of entries) {
+    const dbPath = path.join(directory, entry.name);
+    const stat = fs.statSync(dbPath);
+    let mtimeMs = stat.mtimeMs;
+    // agy writes to the -wal file first, like signature() in usage.js.
+    if (wals.has(`${entry.name}-wal`)) {
+      try {
+        mtimeMs = Math.max(mtimeMs, fs.statSync(`${dbPath}-wal`).mtimeMs);
+      } catch {
+        // Removed since the listing.
+      }
+    }
+    if (Number.isFinite(mtimeMs) && (!newest || mtimeMs > newest.mtimeMs)) {
+      newest = { mtimeMs, birthtimeMs: stat.birthtimeMs };
+    }
+  }
+
+  if (!newest) {
+    return { startMs: null, newestMtimeMs: null };
+  }
+  const startMs = newest.birthtimeMs;
+  // Some Linux filesystems report no creation time: hide rather than guess.
+  const valid =
+    Number.isFinite(startMs) && startMs > 0 && startMs <= newest.mtimeMs && startMs <= nowMs;
+  return { startMs: valid ? startMs : null, newestMtimeMs: newest.mtimeMs };
+}
+
+// Read file metadata only. Conversation database names are IDs and never enter
+// the session object, cache or log.
+function readSessionStartMs(nowMs = Date.now()) {
+  try {
+    if (!Number.isFinite(nowMs)) {
+      return null;
+    }
+    const cacheFile = sessionCachePath();
+    let result = cacheFile ? readSessionCache(cacheFile) : null;
+    if (!result || nowMs - result.scannedAt >= SESSION_CACHE_TTL_MS || result.scannedAt > nowMs) {
+      result = { ...scanSessionStart(nowMs), scannedAt: nowMs };
+      if (cacheFile) {
+        writeSessionCache(cacheFile, result);
+      }
+    }
+    if (result.startMs === null || nowMs - result.newestMtimeMs > SESSION_IDLE_MS) {
+      return null;
+    }
+    return result.startMs;
+  } catch {
+    // A missing or unreadable conversations folder only hides this widget.
+    return null;
+  }
+}
 
 // Node's platform ids, spelled the way people write them.
 const OS_NAMES = {
@@ -186,8 +300,8 @@ function contextUsedPercent(data) {
   return (current * 100) / size;
 }
 
-// options.readUsage: the statusline itself may read agy's conversation
-// databases; previews only use the usage cache.
+// options.readUsage: the live statusline may read conversation metadata and
+// databases; previews use the usage cache and a synthetic sample start time.
 function extractSession(data, config, options = {}) {
   const git = resolveGit(data, config);
   const gitDetails = resolveGitDetails(data, config);
@@ -237,6 +351,14 @@ function extractSession(data, config, options = {}) {
   const uses = (id) => Boolean(config?.widgets?.some((widget) => widget?.id === id));
   const osName = uses("os") ? currentOsName() : "";
   const { username, hostname } = uses("host") ? currentUserAndHost() : {};
+  let sessionStartMs = null;
+  if (uses("sessionTime")) {
+    if (options.readUsage === true) {
+      sessionStartMs = readSessionStartMs();
+    } else if (Number.isFinite(data?.[SAMPLE_SESSION_START_MS])) {
+      sessionStartMs = data[SAMPLE_SESSION_START_MS];
+    }
+  }
 
   return {
     os: osName,
@@ -279,6 +401,7 @@ function extractSession(data, config, options = {}) {
     vimMode: firstText(data.vim?.mode),
     // Left out until the conversation has a title; kept to one line.
     title: firstText(data.conversation_title).replace(/\s+/g, " ").trim(),
+    sessionStartMs,
     version: firstText(data.version),
     sandbox: data.sandbox?.enabled === true,
     sandboxNet: data.sandbox?.allow_network === true,
@@ -302,5 +425,6 @@ module.exports = {
   tightestQuota,
   contextUsedPercent,
   currentUserAndHost,
+  readSessionStartMs,
   extractSession,
 };

@@ -5,7 +5,7 @@ function sampleData() {
   const fiveHourReset = new Date(now + (2 * 3600 + 47 * 60) * 1000);
   const weeklyReset = new Date(now + (86400 + 17 * 3600) * 1000);
 
-  return {
+  const sample = {
     cwd: process.cwd(),
     model: {
       id: "Gemini 3.8 Flash (High)",
@@ -77,6 +77,10 @@ function sampleData() {
     plan_tier: "Pro",
     terminal_width: process.stdout.columns || 120,
   };
+
+  // A symbol keeps the preview-only start time out of serialized payloads.
+  sample[Symbol.for("agy-powerline.sampleSessionStartMs")] = now - 25 * 60 * 1000;
+  return sample;
 }
 
 module.exports = {

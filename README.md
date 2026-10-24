@@ -1,6 +1,6 @@
 # agy-powerline
 
-**English** | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md)
+**English** | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md)
 
 [![Version](https://img.shields.io/npm/v/agy-powerline.svg)](https://www.npmjs.com/package/agy-powerline)
 [![Downloads](https://img.shields.io/npm/d18m/agy-powerline.svg?cacheSeconds=86400)](https://www.npmjs.com/package/agy-powerline)
@@ -93,7 +93,7 @@ Start from a preset, then adjust:
 | Terminal background | Themes                                                                                                                                                                                    |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Dark                | `dark-aurora` (default), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-nord`, `dark-rose-pine` |
-| Light               | `light-paper`, `light-sky`, `light-sunset`, `light-cream`                                                                                                                                 |
+| Light               | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                           |
 | Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                                                                     |
 | Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                                                                      |
 
@@ -166,6 +166,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/) or with `npx
 | `tasks`                                                       | Running subagents and background tasks                                                                   |
 | `mode`                                                        | Approval mode (e.g. accept-edits) and Vim mode                                                           |
 | `title`                                                       | The conversation's title                                                                                 |
+| `sessionTime`                                                 | Time since the active conversation started                                                               |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Session tokens and prompt cache usage                                                                    |
 | `tokensToday`, `tokensWeek`                                   | Tokens used today and over the last 7 days, all conversations (Node 22.13+)                              |
 | `ram`                                                         | Memory used on your machine                                                                              |

@@ -1,6 +1,6 @@
 # agy-powerline
 
-[English](README.md) | **简体中文** | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md)
+[English](README.md) | **简体中文** | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md)
 
 [![Version](https://img.shields.io/npm/v/agy-powerline.svg)](https://www.npmjs.com/package/agy-powerline)
 [![Downloads](https://img.shields.io/npm/d18m/agy-powerline.svg?cacheSeconds=86400)](https://www.npmjs.com/package/agy-powerline)
@@ -82,7 +82,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | 终端背景   | 主题                                                                                                                                                                                    |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 深色       | `dark-aurora`（默认）、`dark-ocean`、`dark-ember`、`dark-forest`、`dark-neon`、`dark-mono`、`dark-nocturne`、`dark-onyx`、`dark-metro`、`dark-macchiato`、`dark-nord`、`dark-rose-pine` |
-| 浅色       | `light-paper`、`light-sky`、`light-sunset`、`light-cream`                                                                                                                               |
+| 浅色       | `light-paper`、`light-sky`、`light-sunset`、`light-cream`、`light-gruvbox`、`light-tokyo-night`                                                                                         |
 | 色盲友好   | `colorblind-dark`、`colorblind-light`                                                                                                                                                   |
 | 自定义颜色 | `custom`（[方法](docs/configuration.md#custom-theme)）                                                                                                                                  |
 
@@ -155,6 +155,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | `tasks`                                                       | 正在运行的子代理和后台任务                                                                               |
 | `mode`                                                        | 审批模式（如 accept-edits）和 Vim 模式                                                                   |
 | `title`                                                       | 对话标题                                                                                                 |
+| `sessionTime`                                                 | Time since the active conversation started                                                               |
 | `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | 会话 token 数和提示缓存的使用情况                                                                        |
 | `tokensToday`、`tokensWeek`                                   | 今天和过去 7 天的 token 用量（所有对话，Node 22.13+）                                                    |
 | `ram`                                                         | 本机已用内存                                                                                             |
