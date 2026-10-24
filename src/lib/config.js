@@ -53,6 +53,7 @@ const VALID_WIDGET_IDS = new Set([
   "tasks",
   "mode",
   "title",
+  "sessionTime",
   "ram",
   "version",
   "sandbox",

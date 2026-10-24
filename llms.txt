@@ -89,6 +89,7 @@
 - `tasks` — Running subagents and background tasks.
 - `mode` — Approval mode and Vim mode.
 - `title` — Current conversation title.
+- `sessionTime` — Elapsed time since the active conversation started, from file metadata only.
 - `ram` — Memory used on the machine.
 - `os` — Operating system running agy (Windows, macOS, Linux or WSL).
 - `host` — Current user and short hostname from the OS.

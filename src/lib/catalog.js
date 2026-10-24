@@ -223,6 +223,13 @@ const WIDGET_CATALOG = [
     summary: "current conversation title",
   },
   {
+    id: "sessionTime",
+    label: "Session Time",
+    unique: true,
+    description: "how long the current conversation has run",
+    summary: "how long this session has run",
+  },
+  {
     id: "ram",
     label: "RAM Usage",
     unique: true,

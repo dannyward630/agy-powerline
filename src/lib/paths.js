@@ -48,6 +48,8 @@ const PRIVATE_FILES = [
   // USAGE_CACHE_NAME in usage.js: tokens per day, keyed by a hash of each
   // conversation database's path.
   ".usage-cache.json",
+  // SESSION_CACHE_NAME in session.js: start and newest mtime timestamps only.
+  ".session-cache.json",
   // LOG_NAME in log.js, spelled out because log.js requires this file.
   "agy-powerline.log",
 ];

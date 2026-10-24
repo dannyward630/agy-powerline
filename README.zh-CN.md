@@ -155,6 +155,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | `tasks`                                                       | 正在运行的子代理和后台任务                                                                               |
 | `mode`                                                        | 审批模式（如 accept-edits）和 Vim 模式                                                                   |
 | `title`                                                       | 对话标题                                                                                                 |
+| `sessionTime`                                                 | Time since the active conversation started                                                               |
 | `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | 会话 token 数和提示缓存的使用情况                                                                        |
 | `tokensToday`、`tokensWeek`                                   | 今天和过去 7 天的 token 用量（所有对话，Node 22.13+）                                                    |
 | `ram`                                                         | 本机已用内存                                                                                             |

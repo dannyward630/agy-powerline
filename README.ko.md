@@ -168,6 +168,7 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 | `tasks`                                                       | 실행 중인 서브에이전트와 백그라운드 작업                                                         |
 | `mode`                                                        | 승인 모드(예: accept-edits)와 Vim 모드                                                           |
 | `title`                                                       | 대화 제목                                                                                        |
+| `sessionTime`                                                 | 활성 대화가 시작된 이후 경과 시간                                                                |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | 세션 토큰과 프롬프트 캐시 사용량                                                                 |
 | `tokensToday`, `tokensWeek`                                   | 오늘 및 최근 7일간 사용한 토큰, 모든 대화 포함(Node 22.13+)                                      |
 | `ram`                                                         | 시스템 메모리 사용량                                                                             |

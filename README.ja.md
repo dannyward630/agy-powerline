@@ -155,6 +155,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | `tasks`                                                       | 実行中のサブエージェントとバックグラウンドタスク                                                         |
 | `mode`                                                        | 承認モード（例：accept-edits）と Vim モード                                                              |
 | `title`                                                       | 会話のタイトル                                                                                           |
+| `sessionTime`                                                 | Time since the active conversation started                                                               |
 | `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | セッションのトークン数とプロンプトキャッシュの使用状況                                                   |
 | `tokensToday`、`tokensWeek`                                   | 今日と過去 7 日間のトークン使用量（すべての会話、Node 22.13 以降）                                       |
 | `ram`                                                         | マシンのメモリ使用量                                                                                     |

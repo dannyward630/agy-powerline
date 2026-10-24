@@ -116,6 +116,7 @@ const WIDGET_TAGS = {
   tasks: { icon: "👥", name: "" },
   mode: { icon: "🧭", name: "" },
   title: { icon: "💬", name: "" },
+  sessionTime: { icon: "⏱️", name: "Session" },
   ram: { icon: "💻", name: "RAM" },
   version: { icon: "🔖", name: "" },
   sandbox: { icon: "🔒", name: "" },

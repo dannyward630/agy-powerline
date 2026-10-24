@@ -27,6 +27,15 @@ function formatReset(seconds) {
   return `${Math.max(1, minutes)}m`;
 }
 
+function formatSessionTime(startMs, nowMs = Date.now()) {
+  const start = Number(startMs);
+  const now = Number(nowMs);
+  if (!Number.isFinite(start) || start <= 0 || !Number.isFinite(now) || now - start < 60000) {
+    return "";
+  }
+  return formatReset((now - start) / 1000);
+}
+
 const MONTHS_SHORT = [
   "jan",
   "feb",
@@ -732,6 +741,7 @@ module.exports = {
   firstText,
   sanitizeDeep,
   formatReset,
+  formatSessionTime,
   MONTHS_SHORT,
   parseResetDate,
   formatClockTime,

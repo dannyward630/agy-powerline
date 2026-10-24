@@ -29,6 +29,7 @@ const {
   shortModelName,
   formatTokenSplit,
   formatUsage,
+  formatSessionTime,
   formatGitSync,
   formatGitOperation,
   gitChangeParts,
@@ -624,6 +625,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       return pill(colors.meta, lbl(limitWidth(session.title, widget, ascii, TITLE_MAX)));
+
+    case "sessionTime": {
+      const text = formatSessionTime(session.sessionStartMs);
+      return text ? pill(colors.meta, lbl(text)) : null;
+    }
 
     case "ram": {
       const pct = session.ramPct ?? 0;
